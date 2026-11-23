@@ -253,10 +253,10 @@ export function NewMatterDrawer({
                       const checked = teamIds.includes(m.id);
                       return (
                         <li key={m.id} className="min-w-0">
-                          <label className="flex w-full min-w-0 cursor-pointer items-center gap-2 rounded px-2 py-1.5 text-sm hover:bg-[var(--surface)]">
+                          <label className="flex w-full min-w-0 cursor-pointer items-center gap-2 rounded px-2 py-1.5 text-sm text-[var(--ink)] hover:bg-[var(--surface)]">
                             <input
                               type="checkbox"
-                              className="shrink-0"
+                              className="h-4 w-4 shrink-0 accent-[var(--wine-900)]"
                               checked={checked}
                               onChange={() =>
                                 setTeamIds((prev) =>
@@ -274,10 +274,10 @@ export function NewMatterDrawer({
                                 .join("")
                                 .toUpperCase()}
                             </span>
-                            <span className="min-w-0 flex-1 truncate font-medium">
+                            <span className="min-w-0 flex-1 truncate font-medium leading-normal">
                               {m.full_name}
                             </span>
-                            <span className="shrink-0 capitalize text-xs text-[var(--muted)]">
+                            <span className="shrink-0 capitalize text-xs leading-normal text-[var(--muted)]">
                               {m.role}
                             </span>
                           </label>
