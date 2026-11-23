@@ -57,8 +57,8 @@ export function NewClientMatterForm({
           />
         </div>
         <div className="field">
-          <Label htmlFor="nif">NIT</Label>
-          <Input id="nif" name="nif" placeholder="Opcional · ej. 900.123.456-7" />
+          <Label htmlFor="nif">NIT (número, sin DV)</Label>
+          <Input id="nif" name="nif" placeholder="Opcional · ej. 900123456" />
         </div>
         <div className="field">
           <Label htmlFor="phone">Teléfono</Label>

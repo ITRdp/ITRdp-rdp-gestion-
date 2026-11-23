@@ -15,6 +15,7 @@ import {
 type MatterHit = {
   id: string;
   title: string;
+  code?: string;
   status: string;
   clientName: string | null;
 };
@@ -106,13 +107,14 @@ export function CommandPalette({
             {matters.map((m) => (
               <CommandItem
                 key={m.id}
-                value={`asunto-${m.title}-${m.clientName ?? ""}`}
+                value={`asunto-${m.code ?? ""}-${m.title}-${m.clientName ?? ""}`}
                 onSelect={() => go(`/asuntos/${m.id}`)}
               >
                 <Briefcase className="text-[var(--gold-400)]" />
                 <div className="min-w-0">
                   <p className="truncate font-medium">{m.title}</p>
                   <p className="truncate text-xs text-[var(--muted)]">
+                    {m.code ? `${m.code} · ` : ""}
                     {m.clientName ?? "Cliente"} · {m.status}
                   </p>
                 </div>
@@ -126,14 +128,14 @@ export function CommandPalette({
               <CommandItem
                 key={c.id}
                 value={`cliente-${c.name}`}
-                onSelect={() => go(`/asuntos?cliente=${encodeURIComponent(c.name)}`)}
+                onSelect={() => go(`/clientes/${c.id}`)}
               >
                 <Users className="text-[var(--wine-700)]" />
                 <div className="min-w-0">
                   <p className="truncate font-medium">{c.name}</p>
                   {c.nit ? (
                     <p className="truncate text-xs text-[var(--muted)]">
-                      NIT {c.nit}
+                      Doc. {c.nit}
                     </p>
                   ) : null}
                 </div>

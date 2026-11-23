@@ -22,13 +22,17 @@ export async function GET(request: Request) {
   const [{ data: matters }, { data: clients }] = await Promise.all([
     supabase
       .from("matters")
-      .select("id, title, status, clients ( name )")
-      .ilike("title", pattern)
+      .select("id, code, title, status, clients ( name )")
+      .is("deleted_at", null)
+      .or(`title.ilike.${pattern},code.ilike.${pattern}`)
       .limit(8),
     supabase
       .from("clients")
-      .select("id, name, nif")
-      .ilike("name", pattern)
+      .select("id, name, document_type, document_number, document_dv")
+      .is("deleted_at", null)
+      .or(
+        `name.ilike.${pattern},legal_name.ilike.${pattern},document_number.ilike.${pattern}`,
+      )
       .limit(8),
   ]);
 
@@ -38,6 +42,7 @@ export async function GET(request: Request) {
       return {
         id: m.id,
         title: m.title,
+        code: m.code,
         status: m.status,
         clientName: client?.name ?? null,
       };
@@ -45,7 +50,10 @@ export async function GET(request: Request) {
     clients: (clients ?? []).map((c) => ({
       id: c.id,
       name: c.name,
-      nit: c.nif,
+      nit:
+        c.document_type === "NIT" && c.document_number
+          ? `${c.document_number}${c.document_dv ? `-${c.document_dv}` : ""}`
+          : c.document_number,
     })),
   });
 }

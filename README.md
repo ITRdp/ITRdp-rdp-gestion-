@@ -45,14 +45,14 @@ SUPABASE_SERVICE_ROLE_KEY=tu_service_role_key
 6. En **Authentication → URL Configuration**, añade `http://localhost:3000` como Site URL (y Redirect URLs si usas callbacks).
 7. Desactiva el registro público si tu plan/UI lo permite (**Authentication → Providers → Email → Disable sign ups**). La app no ofrece pantalla de alta; el middleware y `members.enabled` hacen de puerta.
 
-## 2. Aplicar la migración SQL
+## 2. Aplicar las migraciones SQL
 
 1. Abre **SQL Editor** en Supabase.
-2. Pega y ejecuta el contenido de:
+2. Ejecuta **en orden**:
+   - `supabase/migrations/20261123000000_initial_schema.sql` (v1)
+   - `supabase/migrations/20261123010000_fase2_clients_matters.sql` (Fase 2)
 
-`supabase/migrations/20261123000000_initial_schema.sql`
-
-Eso crea las tablas `members`, `clients`, `matters`, `actuaciones`, `tasks`, índices, funciones RLS y políticas. Solo miembros habilitados leen/escriben datos del despacho.
+Guía Fase 2: `docs/fase2-migracion.md`. Catálogos: `docs/fase2-catalogos.md`.
 
 ## 3. Crear y habilitar 3 usuarios de prueba
 
@@ -96,8 +96,10 @@ Pantallas:
 
 - `/login` — Acceso
 - `/` o `/jornada` — Mi jornada
-- `/asuntos` — Listado y alta
-- `/asuntos/[id]` — Ficha del asunto (actuaciones, tareas, auditoría)
+- `/asuntos` — Tabla / Kanban + drawer Nuevo asunto
+- `/asuntos/[id]` — Ficha con pestañas (Resumen, Actividad, Tareas, stubs)
+- `/clientes` — Módulo clientes
+- `/clientes/[id]` — Ficha cliente + asuntos
 
 ## Seguridad
 

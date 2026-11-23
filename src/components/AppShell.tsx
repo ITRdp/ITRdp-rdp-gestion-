@@ -12,6 +12,7 @@ import {
   Menu,
   Search,
   SunMedium,
+  Users,
   X,
 } from "lucide-react";
 import { logoutAction } from "@/app/actions/auth";
@@ -21,12 +22,23 @@ import { cn } from "@/lib/utils";
 import type { Member } from "@/lib/types";
 
 const nav = [
-  { href: "/", label: "Mi jornada", icon: SunMedium, match: (p: string) => p === "/" || p.startsWith("/jornada") },
+  {
+    href: "/",
+    label: "Mi jornada",
+    icon: SunMedium,
+    match: (p: string) => p === "/" || p.startsWith("/jornada"),
+  },
   {
     href: "/asuntos",
     label: "Asuntos",
     icon: BriefcaseBusiness,
     match: (p: string) => p.startsWith("/asuntos"),
+  },
+  {
+    href: "/clientes",
+    label: "Clientes",
+    icon: Users,
+    match: (p: string) => p.startsWith("/clientes"),
   },
 ];
 

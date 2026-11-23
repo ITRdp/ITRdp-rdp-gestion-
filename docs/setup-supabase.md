@@ -23,13 +23,14 @@ SUPABASE_SERVICE_ROLE_KEY=tu_service_role_key
 5. **Authentication → Providers**: Email activado; desactiva sign-ups públicos si está disponible.
 6. **Authentication → URL Configuration**: Site URL `http://localhost:3000`.
 
-## 2. Aplicar la migración
+## 2. Aplicar las migraciones
 
-En **SQL Editor**, ejecuta íntegramente:
+En **SQL Editor**, ejecuta **en orden**:
 
-`supabase/migrations/20261123000000_initial_schema.sql`
+1. `supabase/migrations/20261123000000_initial_schema.sql` — v1 (tablas base + RLS)
+2. `supabase/migrations/20261123010000_fase2_clients_matters.sql` — Fase 2 (clientes/asuntos ampliados)
 
-Crea tablas, índices, helpers RLS (`is_enabled_member`, `is_admin_member`) y políticas. Solo miembros con `enabled = true` operan sobre los datos del despacho.
+Detalle Fase 2: `docs/fase2-migracion.md`. Solo miembros con `enabled = true` operan sobre los datos del despacho.
 
 ## 3. Tres usuarios de prueba
 
@@ -67,7 +68,7 @@ npm run dev
 
 Abrir http://localhost:3000 → `/login`.
 
-Rutas: `/` (Mi jornada), `/asuntos`, `/asuntos/[id]`.
+Rutas: `/` (Mi jornada), `/asuntos`, `/asuntos/[id]`, `/clientes`, `/clientes/[id]`.
 
 ## Notas
 
