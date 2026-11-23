@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { softDeleteMatterAction } from "@/app/actions/matters";
 import { ActuacionForm } from "@/components/ActuacionForm";
 import { ActivityTimeline } from "@/components/activity/activity-timeline";
-import { AppShell } from "@/components/AppShell";
+import { AppShellHost as AppShell } from "@/components/AppShellHost";
 import { CompleteTaskButton } from "@/components/CompleteTaskButton";
 import { DocumentsPanel } from "@/components/documents/documents-panel";
 import { EmptyState } from "@/components/EmptyState";

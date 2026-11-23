@@ -1,8 +1,8 @@
 import Link from "next/link";
-import { AppShell } from "@/components/AppShell";
+import { AppShellHost as AppShell } from "@/components/AppShellHost";
 import { ClientForm } from "@/components/ClientForm";
 import { EmptyState } from "@/components/EmptyState";
-import { requireMember } from "@/lib/auth";
+import { canManageClientsMatters, requireMember } from "@/lib/auth";
 import { formatDocument } from "@/lib/nit";
 import { createClient } from "@/lib/supabase/server";
 import { labelOf, PERSON_TYPES } from "@/lib/catalogs";
@@ -13,9 +13,10 @@ export default async function ClientesPage({
   searchParams: Promise<{ q?: string; nuevo?: string }>;
 }) {
   const member = await requireMember();
+  const canWrite = canManageClientsMatters(member);
   const params = await searchParams;
   const q = params.q?.trim() ?? "";
-  const showForm = params.nuevo === "1";
+  const showForm = canWrite && params.nuevo === "1";
   const supabase = await createClient();
 
   let query = supabase
@@ -46,9 +47,15 @@ export default async function ClientesPage({
             Personas naturales y jurídicas con documento colombiano (NIT con DV).
           </p>
         </div>
-        <Link href="/clientes?nuevo=1" className="btn btn-primary text-sm">
-          Nuevo cliente
-        </Link>
+        {canWrite ? (
+          <Link href="/clientes?nuevo=1" className="btn btn-primary text-sm">
+            Nuevo cliente
+          </Link>
+        ) : (
+          <p className="text-xs text-[var(--muted)]">
+            Solo abogados/admin crean clientes.
+          </p>
+        )}
       </header>
 
       <form className="mb-6 flex gap-2">

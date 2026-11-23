@@ -12,6 +12,7 @@ import {
   LogOut,
   Menu,
   Search,
+  Settings2,
   SunMedium,
   BarChart3,
   Users,
@@ -19,50 +20,68 @@ import {
 } from "lucide-react";
 import { logoutAction } from "@/app/actions/auth";
 import { CommandPalette } from "@/components/CommandPalette";
+import { NotificationsBell } from "@/components/notifications/notifications-bell";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import type { Member } from "@/lib/types";
+import type { AppNotification, Member } from "@/lib/types";
 
-const nav = [
+const navBase = [
   {
     href: "/",
     label: "Mi jornada",
     icon: SunMedium,
     match: (p: string) => p === "/" || p.startsWith("/jornada"),
+    adminOnly: false,
   },
   {
     href: "/agenda",
     label: "Agenda",
     icon: CalendarDays,
     match: (p: string) => p.startsWith("/agenda"),
+    adminOnly: false,
   },
   {
     href: "/asuntos",
     label: "Asuntos",
     icon: BriefcaseBusiness,
     match: (p: string) => p.startsWith("/asuntos"),
+    adminOnly: false,
   },
   {
     href: "/clientes",
     label: "Clientes",
     icon: Users,
     match: (p: string) => p.startsWith("/clientes"),
+    adminOnly: false,
   },
   {
     href: "/reportes",
     label: "Reportes",
     icon: BarChart3,
     match: (p: string) => p.startsWith("/reportes"),
+    adminOnly: false,
+  },
+  {
+    href: "/admin",
+    label: "Administración",
+    icon: Settings2,
+    match: (p: string) => p.startsWith("/admin"),
+    adminOnly: true,
   },
 ];
 
 export function AppShell({
   member,
   children,
+  notifications = [],
+  unreadCount = 0,
 }: {
   member: Member;
   children: React.ReactNode;
+  notifications?: AppNotification[];
+  unreadCount?: number;
 }) {
+  const nav = navBase.filter((item) => !item.adminOnly || member.role === "admin");
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -208,13 +227,22 @@ export function AppShell({
             </kbd>
           </button>
 
-          <div className="ml-auto flex items-center gap-2 sm:gap-3">
+          <div className="ml-auto flex items-center gap-1 sm:gap-3">
+            <NotificationsBell
+              notifications={notifications}
+              unreadCount={unreadCount}
+            />
             <div className="hidden text-right leading-tight sm:block">
               <p className="text-sm font-medium text-[var(--ink)]">
                 {member.full_name}
               </p>
               <p className="text-xs capitalize text-[var(--muted)]">
-                {member.role}
+                <Link
+                  href="/ajustes"
+                  className="hover:text-[var(--gold-500)] hover:underline"
+                >
+                  {member.role}
+                </Link>
               </p>
             </div>
             <form action={logoutAction}>

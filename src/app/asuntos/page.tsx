@@ -1,8 +1,8 @@
 import { Suspense } from "react";
-import { AppShell } from "@/components/AppShell";
+import { AppShellHost as AppShell } from "@/components/AppShellHost";
 import { MattersBoard, type MatterRow } from "@/components/MattersBoard";
 import { NewMatterDrawer } from "@/components/NewMatterDrawer";
-import { requireMember } from "@/lib/auth";
+import { canManageClientsMatters, requireMember } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import type { Client, Member, MatterStage, MatterStatus } from "@/lib/types";
 
@@ -20,6 +20,7 @@ export default async function AsuntosPage({
   }>;
 }) {
   const member = await requireMember();
+  const canWrite = canManageClientsMatters(member);
   const params = await searchParams;
   const supabase = await createClient();
 
@@ -110,14 +111,20 @@ export default async function AsuntosPage({
             Tabla y Kanban por etapa. Filtros reflejados en la URL.
           </p>
         </div>
-        <NewMatterDrawer
-          clients={(clients ?? []) as Pick<
-            Client,
-            "id" | "name" | "document_number" | "document_dv"
-          >[]}
-          members={(members ?? []) as Member[]}
-          currentMemberId={member.id}
-        />
+        {canWrite ? (
+          <NewMatterDrawer
+            clients={(clients ?? []) as Pick<
+              Client,
+              "id" | "name" | "document_number" | "document_dv"
+            >[]}
+            members={(members ?? []) as Member[]}
+            currentMemberId={member.id}
+          />
+        ) : (
+          <p className="text-xs text-[var(--muted)]">
+            Solo abogados/admin crean asuntos.
+          </p>
+        )}
       </header>
 
       <Suspense fallback={<div className="skeleton h-40 w-full" />}>

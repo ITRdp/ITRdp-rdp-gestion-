@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { AppShell } from "@/components/AppShell";
+import { AppShellHost as AppShell } from "@/components/AppShellHost";
 import { EmptyState } from "@/components/EmptyState";
 import { Button } from "@/components/ui/button";
 import { requireMember } from "@/lib/auth";

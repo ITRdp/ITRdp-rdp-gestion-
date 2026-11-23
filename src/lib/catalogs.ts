@@ -1,4 +1,10 @@
-/** Catálogos Fase 2 — editables vía código; documentados en docs/fase2-catalogos.md */
+/** Catálogos de dominio — documentados en docs/fase2-catalogos.md y fase5 */
+
+export const MEMBER_ROLES = [
+  { value: "admin", label: "Administrador" },
+  { value: "abogado", label: "Abogado" },
+  { value: "paralegal", label: "Paralegal" },
+] as const;
 
 export const PERSON_TYPES = [
   { value: "natural", label: "Persona natural" },

@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import { AppShell } from "@/components/AppShell";
+import { AppShellHost as AppShell } from "@/components/AppShellHost";
 import { AgendaViews } from "@/components/AgendaViews";
 import { EventForm } from "@/components/EventForm";
 import { requireMember } from "@/lib/auth";

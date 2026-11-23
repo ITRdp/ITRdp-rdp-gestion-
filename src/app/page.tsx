@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { AppShell } from "@/components/AppShell";
+import { AppShellHost as AppShell } from "@/components/AppShellHost";
 import { CompleteTaskButton } from "@/components/CompleteTaskButton";
 import { EmptyState } from "@/components/EmptyState";
 import { SemaforoBadge } from "@/components/SemaforoBadge";

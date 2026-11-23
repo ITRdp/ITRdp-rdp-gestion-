@@ -31,8 +31,9 @@ En **SQL Editor**, ejecuta **en orden**:
 2. `supabase/migrations/20261123010000_fase2_clients_matters.sql` — Fase 2 (clientes/asuntos ampliados)
 3. `supabase/migrations/20261123020000_fase3_agenda_tasks.sql` — Fase 3 (agenda, festivos, tareas)
 4. `supabase/migrations/20261123030000_fase4_activity_docs_time.sql` — Fase 4 (activity_log, documentos, tiempo)
+5. `supabase/migrations/20261123040000_fase5_admin_rls_notifications.sql` — Fase 5 (admin, RLS por rol, notificaciones)
 
-Detalle: `docs/fase2-migracion.md`, `docs/fase3-agenda-terminos.md`, `docs/fase4-actividad-docs-tiempo.md`. Solo miembros con `enabled = true` operan sobre los datos del despacho.
+Detalle: `docs/fase2-migracion.md`, `docs/fase3-agenda-terminos.md`, `docs/fase4-actividad-docs-tiempo.md`, `docs/fase5-admin-permisos-avisos.md`. Solo miembros con `enabled = true` operan sobre los datos del despacho.
 
 **Storage (Fase 4):** confirma el bucket privado `matter-documents` en Dashboard → Storage (o créalo a mano si el `DO` de la migración no corrió).
 
@@ -72,7 +73,9 @@ npm run dev
 
 Abrir http://localhost:3000 → `/login`.
 
-Rutas: `/` (Mi jornada), `/agenda`, `/asuntos`, `/asuntos/[id]`, `/clientes`, `/clientes/[id]`, `/reportes`.
+Rutas: `/` (Mi jornada), `/agenda`, `/asuntos`, `/asuntos/[id]`, `/clientes`, `/clientes/[id]`, `/reportes`, `/admin` (solo admin), `/ajustes`.
+
+**Invitar miembros (Fase 5):** requiere `SUPABASE_SERVICE_ROLE_KEY` solo en servidor. Nunca la expongas al cliente.
 
 ## Notas
 

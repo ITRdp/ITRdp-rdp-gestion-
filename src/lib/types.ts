@@ -41,6 +41,28 @@ export type Member = {
   full_name: string;
   role: MemberRole;
   enabled: boolean;
+  email_daily_digest?: boolean;
+  notify_in_app?: boolean;
+  created_at: string;
+};
+
+export type NotificationKind =
+  | "info"
+  | "task_assigned"
+  | "task_comment"
+  | "matter_assigned"
+  | "system";
+
+export type AppNotification = {
+  id: string;
+  member_id: string;
+  title: string;
+  body: string | null;
+  href: string | null;
+  kind: NotificationKind;
+  entity_type: string | null;
+  entity_id: string | null;
+  read_at: string | null;
   created_at: string;
 };
 

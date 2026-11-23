@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { addClientContactAction } from "@/app/actions/clients";
-import { AppShell } from "@/components/AppShell";
+import { AppShellHost as AppShell } from "@/components/AppShellHost";
 import { ClientForm } from "@/components/ClientForm";
 import { EmptyState } from "@/components/EmptyState";
 import { NewMatterDrawer } from "@/components/NewMatterDrawer";
