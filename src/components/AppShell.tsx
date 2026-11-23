@@ -13,6 +13,7 @@ import {
   Menu,
   Search,
   SunMedium,
+  BarChart3,
   Users,
   X,
 } from "lucide-react";
@@ -46,6 +47,12 @@ const nav = [
     label: "Clientes",
     icon: Users,
     match: (p: string) => p.startsWith("/clientes"),
+  },
+  {
+    href: "/reportes",
+    label: "Reportes",
+    icon: BarChart3,
+    match: (p: string) => p.startsWith("/reportes"),
   },
 ];
 

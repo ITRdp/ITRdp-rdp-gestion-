@@ -2,8 +2,10 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { softDeleteMatterAction } from "@/app/actions/matters";
 import { ActuacionForm } from "@/components/ActuacionForm";
+import { ActivityTimeline } from "@/components/activity/activity-timeline";
 import { AppShell } from "@/components/AppShell";
 import { CompleteTaskButton } from "@/components/CompleteTaskButton";
+import { DocumentsPanel } from "@/components/documents/documents-panel";
 import { EmptyState } from "@/components/EmptyState";
 import { MatterEditForm } from "@/components/MatterEditForm";
 import { SemaforoBadge } from "@/components/SemaforoBadge";
@@ -14,6 +16,7 @@ import {
   TaskStatusBadge,
   TaskStatusSelect,
 } from "@/components/TaskExtras";
+import { TimePanel } from "@/components/time/time-panel";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { requireMember } from "@/lib/auth";
@@ -32,12 +35,15 @@ import { formatCOP } from "@/lib/money";
 import { createClient } from "@/lib/supabase/server";
 import type {
   Actuacion,
+  ActivityLogEntry,
   ChecklistItem,
   Client,
   Matter,
+  MatterDocument,
   Member,
   TaskStatus,
   TaskTemplate,
+  TimeEntry,
 } from "@/lib/types";
 
 type Params = { id: string };
@@ -65,6 +71,9 @@ export default async function MatterDetailPage({
     { data: matterEvents },
     { data: holidays },
     { data: taskComments },
+    { data: activityLog },
+    { data: documents },
+    { data: timeEntries },
   ] = await Promise.all([
     supabase
       .from("matters")
@@ -124,6 +133,23 @@ export default async function MatterDetailPage({
       )
       .eq("tasks.matter_id", id)
       .order("created_at", { ascending: true }),
+    supabase
+      .from("activity_log")
+      .select("*")
+      .eq("matter_id", id)
+      .order("created_at", { ascending: false })
+      .limit(80),
+    supabase
+      .from("documents")
+      .select("*")
+      .eq("matter_id", id)
+      .is("deleted_at", null)
+      .order("created_at", { ascending: false }),
+    supabase
+      .from("time_entries")
+      .select("*")
+      .eq("matter_id", id)
+      .order("started_at", { ascending: false }),
   ]);
 
   const holidaysSet = holidaySet(holidays ?? []);
@@ -148,6 +174,17 @@ export default async function MatterDetailPage({
     : matter.creator;
 
   const defaultTab = tab ?? "resumen";
+
+  const actorNames: Record<string, string> = {};
+  for (const m of (members as Member[] | null) ?? []) {
+    actorNames[m.id] = m.full_name;
+  }
+
+  const docs = (documents ?? []) as MatterDocument[];
+  const times = (timeEntries ?? []) as TimeEntry[];
+  const activeEntry =
+    times.find((t) => !t.ended_at && t.member_id === member.id) ?? null;
+  const activity = (activityLog ?? []) as ActivityLogEntry[];
 
   return (
     <AppShell member={member}>
@@ -291,44 +328,52 @@ export default async function MatterDetailPage({
         </TabsContent>
 
         <TabsContent value="actividad" className="grid gap-6 lg:grid-cols-2">
-          <ActuacionForm matterId={matter.id} />
+          <div className="grid gap-6">
+            <ActuacionForm matterId={matter.id} />
+            <section>
+              <h2 className="font-display mb-3 text-xl text-[var(--wine-900)]">
+                Actuaciones
+              </h2>
+              {!actuaciones?.length ? (
+                <EmptyState title="Todavía no hay actuaciones registradas." />
+              ) : (
+                <ol className="grid gap-3">
+                  {actuaciones.map((a) => {
+                    const author = Array.isArray(a.author)
+                      ? a.author[0]
+                      : a.author;
+                    return (
+                      <li key={a.id} className="surface rounded-md p-4">
+                        <p className="text-[var(--ink)]">{a.description}</p>
+                        {a.onedrive_url ? (
+                          <p className="mt-2">
+                            <a
+                              href={a.onedrive_url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-sm text-[var(--gold-500)] underline-offset-2 hover:underline"
+                            >
+                              Abrir documento OneDrive
+                            </a>
+                          </p>
+                        ) : null}
+                        <p className="mt-3 text-xs text-[var(--muted)]">
+                          Registrada por{" "}
+                          <strong>{author?.full_name ?? "—"}</strong> el{" "}
+                          {formatDateTime(a.created_at)}
+                        </p>
+                      </li>
+                    );
+                  })}
+                </ol>
+              )}
+            </section>
+          </div>
           <section>
             <h2 className="font-display mb-3 text-xl text-[var(--wine-900)]">
-              Actuaciones
+              Línea de tiempo
             </h2>
-            {!actuaciones?.length ? (
-              <EmptyState title="Todavía no hay actuaciones registradas." />
-            ) : (
-              <ol className="grid gap-3">
-                {actuaciones.map((a) => {
-                  const author = Array.isArray(a.author)
-                    ? a.author[0]
-                    : a.author;
-                  return (
-                    <li key={a.id} className="surface rounded-md p-4">
-                      <p className="text-[var(--ink)]">{a.description}</p>
-                      {a.onedrive_url ? (
-                        <p className="mt-2">
-                          <a
-                            href={a.onedrive_url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-sm text-[var(--gold-500)] underline-offset-2 hover:underline"
-                          >
-                            Abrir documento OneDrive
-                          </a>
-                        </p>
-                      ) : null}
-                      <p className="mt-3 text-xs text-[var(--muted)]">
-                        Registrada por{" "}
-                        <strong>{author?.full_name ?? "—"}</strong> el{" "}
-                        {formatDateTime(a.created_at)}
-                      </p>
-                    </li>
-                  );
-                })}
-              </ol>
-            )}
+            <ActivityTimeline entries={activity} actorNames={actorNames} />
           </section>
         </TabsContent>
 
@@ -457,15 +502,13 @@ export default async function MatterDetailPage({
           </p>
         </TabsContent>
         <TabsContent value="documentos">
-          <EmptyState
-            title="Documentos (próximamente)"
-            description="Stub: Storage llega en fases posteriores. Por ahora usa enlaces OneDrive en actuaciones."
-          />
+          <DocumentsPanel matterId={matter.id} documents={docs} />
         </TabsContent>
         <TabsContent value="tiempo">
-          <EmptyState
-            title="Tiempo (próximamente)"
-            description="Stub: registro de horas en una fase posterior."
+          <TimePanel
+            matterId={matter.id}
+            entries={times}
+            activeEntry={activeEntry}
           />
         </TabsContent>
       </Tabs>

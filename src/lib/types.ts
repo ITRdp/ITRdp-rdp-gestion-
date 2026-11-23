@@ -188,3 +188,47 @@ export type NonBusinessDay = {
   notes: string | null;
   created_at: string;
 };
+
+export type ActivityLogEntry = {
+  id: string;
+  matter_id: string | null;
+  client_id: string | null;
+  actor_id: string | null;
+  entity_type: string;
+  entity_id: string | null;
+  action: string;
+  summary: string;
+  meta: Record<string, unknown>;
+  created_at: string;
+};
+
+export type DocumentSource = "storage" | "onedrive" | "enlace";
+
+export type MatterDocument = {
+  id: string;
+  matter_id: string;
+  title: string;
+  description: string | null;
+  source: DocumentSource;
+  storage_path: string | null;
+  onedrive_url: string | null;
+  file_name: string | null;
+  mime_type: string | null;
+  file_size: number | null;
+  uploaded_by: string;
+  created_at: string;
+  deleted_at: string | null;
+};
+
+export type TimeEntry = {
+  id: string;
+  matter_id: string;
+  member_id: string;
+  description: string | null;
+  started_at: string;
+  ended_at: string | null;
+  duration_minutes: number | null;
+  billable: boolean;
+  created_at: string;
+  updated_at: string;
+};
