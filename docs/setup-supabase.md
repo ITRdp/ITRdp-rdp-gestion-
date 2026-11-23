@@ -36,6 +36,7 @@ En **SQL Editor**, ejecuta **en orden**:
 7. `supabase/migrations/20261123140000_prelanzamiento_stages.sql` — Etapas por tipo + must_change_password
 8. `supabase/migrations/20261123150000_etapas_acordadas.sql` — Mapa exacto (upsert, disable extras, remap)
 9. `supabase/migrations/20261123160000_matters_stage_default_trigger.sql` — Default etapa vía trigger (primera enabled)
+10. `supabase/migrations/20261123170000_matters_stage_update_trigger.sql` — Validación/remap en UPDATE de stage/tipo
 
 Detalle: `docs/fase2-migracion.md`, `docs/fase2-catalogos.md`, `docs/fase3-agenda-terminos.md`, `docs/fase4-actividad-docs-tiempo.md`, `docs/fase5-admin-permisos-avisos.md`, `docs/produccion.md`. Solo miembros con `enabled = true` operan sobre los datos del despacho.
 

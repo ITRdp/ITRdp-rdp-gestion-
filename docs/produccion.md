@@ -25,6 +25,7 @@ Lista actual (incluye fix festivos/áreas y etapas prelanzamiento):
 7. `20261123140000_prelanzamiento_stages.sql`
 8. `20261123150000_etapas_acordadas.sql` — Mapa exacto de etapas (upsert + disable extras + remap)
 9. `20261123160000_matters_stage_default_trigger.sql` — Sin default ingreso; BI trigger primera etapa enabled
+10. `20261123170000_matters_stage_update_trigger.sql` — Mismo trigger en UPDATE (remap si cambia tipo)
 
 4. Crea el bucket privado `matter-documents` si la migración no lo hizo.
 5. Authentication → URL Configuration:
