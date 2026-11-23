@@ -101,6 +101,23 @@ export const TEAM_ROLES = [
   { value: "observador", label: "Observador" },
 ] as const;
 
+export const TASK_STATUSES = [
+  { value: "pendiente", label: "Pendiente" },
+  { value: "en_curso", label: "En curso" },
+  { value: "completada", label: "Completada" },
+  { value: "cancelada", label: "Cancelada" },
+] as const;
+
+export const TASK_PRIORITIES = MATTER_PRIORITIES;
+
+export const EVENT_TYPES = [
+  { value: "audiencia", label: "Audiencia" },
+  { value: "reunion", label: "Reunión" },
+  { value: "plazo", label: "Plazo" },
+  { value: "interno", label: "Interno" },
+  { value: "otro", label: "Otro" },
+] as const;
+
 export function labelOf(
   list: readonly { value: string; label: string }[],
   value: string | null | undefined,

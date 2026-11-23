@@ -356,3 +356,64 @@ h3,
   border-radius: var(--radius);
   text-align: center;
 }
+
+.badge-semaforo-verde {
+  border-color: color-mix(in srgb, var(--success) 40%, transparent);
+  color: var(--success);
+  background: color-mix(in srgb, var(--success) 10%, white);
+}
+
+.badge-semaforo-amarillo {
+  border-color: color-mix(in srgb, #b8860b 45%, transparent);
+  color: #8a6508;
+  background: color-mix(in srgb, #d49f69 18%, white);
+}
+
+.badge-semaforo-rojo {
+  border-color: color-mix(in srgb, var(--danger) 40%, transparent);
+  color: var(--danger);
+  background: color-mix(in srgb, var(--danger) 10%, white);
+}
+
+.agenda-day-cell {
+  min-height: 5.5rem;
+  border: 1px solid var(--line);
+  background: white;
+  padding: 0.35rem;
+}
+
+.agenda-day-cell.is-today {
+  outline: 2px solid var(--gold-400);
+  outline-offset: -2px;
+}
+
+.agenda-day-cell.is-holiday {
+  background: color-mix(in srgb, var(--wine-50) 80%, white);
+}
+
+.agenda-event-chip {
+  display: block;
+  font-size: 0.65rem;
+  line-height: 1.2;
+  padding: 0.15rem 0.3rem;
+  margin-top: 0.15rem;
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--wine-900) 88%, transparent);
+  color: var(--surface);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.agenda-event-chip.audiencia {
+  background: var(--wine-700);
+}
+
+.agenda-event-chip.plazo {
+  background: color-mix(in srgb, var(--danger) 85%, black);
+}
+
+.agenda-event-chip.reunion {
+  background: color-mix(in srgb, var(--gold-400) 75%, var(--wine-900));
+  color: var(--wine-900);
+}

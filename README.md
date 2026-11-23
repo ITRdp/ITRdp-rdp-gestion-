@@ -51,8 +51,9 @@ SUPABASE_SERVICE_ROLE_KEY=tu_service_role_key
 2. Ejecuta **en orden**:
    - `supabase/migrations/20261123000000_initial_schema.sql` (v1)
    - `supabase/migrations/20261123010000_fase2_clients_matters.sql` (Fase 2)
+   - `supabase/migrations/20261123020000_fase3_agenda_tasks.sql` (Fase 3)
 
-Guía Fase 2: `docs/fase2-migracion.md`. Catálogos: `docs/fase2-catalogos.md`.
+Guías: `docs/fase2-migracion.md`, `docs/fase3-agenda-terminos.md`. Catálogos: `docs/fase2-catalogos.md`.
 
 ## 3. Crear y habilitar 3 usuarios de prueba
 
@@ -95,9 +96,10 @@ Abre [http://localhost:3000](http://localhost:3000). Serás redirigido a `/login
 Pantallas:
 
 - `/login` — Acceso
-- `/` o `/jornada` — Mi jornada
+- `/` o `/jornada` — Mi jornada (semáforo, agenda corta)
+- `/agenda` — Mes / semana / lista + eventos
 - `/asuntos` — Tabla / Kanban + drawer Nuevo asunto
-- `/asuntos/[id]` — Ficha con pestañas (Resumen, Actividad, Tareas, stubs)
+- `/asuntos/[id]` — Ficha con pestañas
 - `/clientes` — Módulo clientes
 - `/clientes/[id]` — Ficha cliente + asuntos
 

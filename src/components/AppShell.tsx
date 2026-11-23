@@ -6,6 +6,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   BriefcaseBusiness,
+  CalendarDays,
   ChevronsLeft,
   ChevronsRight,
   LogOut,
@@ -27,6 +28,12 @@ const nav = [
     label: "Mi jornada",
     icon: SunMedium,
     match: (p: string) => p === "/" || p.startsWith("/jornada"),
+  },
+  {
+    href: "/agenda",
+    label: "Agenda",
+    icon: CalendarDays,
+    match: (p: string) => p.startsWith("/agenda"),
   },
   {
     href: "/asuntos",

@@ -6,21 +6,39 @@ import { AppShell } from "@/components/AppShell";
 import { CompleteTaskButton } from "@/components/CompleteTaskButton";
 import { EmptyState } from "@/components/EmptyState";
 import { MatterEditForm } from "@/components/MatterEditForm";
+import { SemaforoBadge } from "@/components/SemaforoBadge";
 import { TaskForm } from "@/components/TaskForm";
+import {
+  TaskChecklist,
+  TaskComments,
+  TaskStatusBadge,
+  TaskStatusSelect,
+} from "@/components/TaskExtras";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { requireMember } from "@/lib/auth";
+import { holidaySet } from "@/lib/business-days";
 import {
+  EVENT_TYPES,
   labelOf,
   MATTER_AREAS,
   MATTER_PRIORITIES,
   MATTER_STAGES,
   MATTER_STATUSES,
+  TASK_PRIORITIES,
 } from "@/lib/catalogs";
-import { formatDate, formatDateTime } from "@/lib/format";
+import { formatDate, formatDateTime, todayISO } from "@/lib/format";
 import { formatCOP } from "@/lib/money";
 import { createClient } from "@/lib/supabase/server";
-import type { Actuacion, Client, Matter, Member } from "@/lib/types";
+import type {
+  Actuacion,
+  ChecklistItem,
+  Client,
+  Matter,
+  Member,
+  TaskStatus,
+  TaskTemplate,
+} from "@/lib/types";
 
 type Params = { id: string };
 
@@ -43,6 +61,10 @@ export default async function MatterDetailPage({
     { data: members },
     { data: clients },
     { data: team },
+    { data: templates },
+    { data: matterEvents },
+    { data: holidays },
+    { data: taskComments },
   ] = await Promise.all([
     supabase
       .from("matters")
@@ -88,7 +110,30 @@ export default async function MatterDetailPage({
         `*, member:members!matter_team_member_id_fkey ( full_name, role )`,
       )
       .eq("matter_id", id),
+    supabase.from("task_templates").select("*").order("name"),
+    supabase
+      .from("events")
+      .select("*")
+      .eq("matter_id", id)
+      .order("starts_at", { ascending: true }),
+    supabase.from("non_business_days").select("day"),
+    supabase
+      .from("task_comments")
+      .select(
+        `*, author:members!task_comments_author_id_fkey ( full_name ), tasks!inner(matter_id)`,
+      )
+      .eq("tasks.matter_id", id)
+      .order("created_at", { ascending: true }),
   ]);
+
+  const holidaysSet = holidaySet(holidays ?? []);
+  const today = todayISO();
+  const commentsByTask = new Map<string, NonNullable<typeof taskComments>>();
+  for (const c of taskComments ?? []) {
+    const list = commentsByTask.get(c.task_id) ?? [];
+    list.push(c);
+    commentsByTask.set(c.task_id, list);
+  }
 
   if (!matter) notFound();
 
@@ -128,9 +173,12 @@ export default async function MatterDetailPage({
             {labelOf(MATTER_PRIORITIES, matter.priority)}
           </span>
           {matter.procedural_deadline ? (
-            <span className="badge badge-gold">
-              Venc. procesal {formatDate(matter.procedural_deadline)}
-            </span>
+            <SemaforoBadge
+              deadline={matter.procedural_deadline}
+              today={today}
+              holidays={holidaysSet}
+              prefix="Venc. procesal"
+            />
           ) : null}
         </div>
         <h1 className="font-display text-3xl text-[var(--wine-900)] sm:text-4xl">
@@ -289,6 +337,7 @@ export default async function MatterDetailPage({
             matterId={matter.id}
             members={(members ?? []) as Member[]}
             actuaciones={(actuaciones ?? []) as Actuacion[]}
+            templates={(templates ?? []) as TaskTemplate[]}
           />
           <section>
             <h2 className="font-display mb-3 text-xl text-[var(--wine-900)]">
@@ -310,21 +359,31 @@ export default async function MatterDetailPage({
                     : task.creator;
                   const mine =
                     task.assignee_id === member.id &&
-                    task.status === "pendiente";
+                    (task.status === "pendiente" || task.status === "en_curso");
+                  const checklist = (task.checklist ?? []) as ChecklistItem[];
 
                   return (
                     <li key={task.id} className="surface rounded-md p-4">
-                      <div className="mb-2 flex flex-wrap gap-2">
-                        <span
-                          className={`badge capitalize ${
-                            task.status === "completada" ? "badge-ok" : ""
-                          }`}
-                        >
-                          {task.status}
+                      <div className="mb-2 flex flex-wrap items-center gap-2">
+                        <TaskStatusBadge status={task.status} />
+                        <TaskStatusSelect
+                          taskId={task.id}
+                          matterId={matter.id}
+                          status={task.status as TaskStatus}
+                        />
+                        <span className="badge capitalize">
+                          {labelOf(TASK_PRIORITIES, task.priority)}
                         </span>
                         <span className="badge">
                           Seguimiento {formatDate(task.follow_up_date)}
                         </span>
+                        <SemaforoBadge
+                          deadline={
+                            task.due_business_date || task.follow_up_date
+                          }
+                          today={today}
+                          holidays={holidaysSet}
+                        />
                       </div>
                       <p className="font-medium text-[var(--ink)]">
                         {task.description}
@@ -343,6 +402,11 @@ export default async function MatterDetailPage({
                           {formatDateTime(task.completed_at)}
                         </p>
                       ) : null}
+                      <TaskChecklist
+                        taskId={task.id}
+                        matterId={matter.id}
+                        checklist={checklist}
+                      />
                       {mine ? (
                         <div className="mt-3">
                           <CompleteTaskButton
@@ -351,6 +415,11 @@ export default async function MatterDetailPage({
                           />
                         </div>
                       ) : null}
+                      <TaskComments
+                        taskId={task.id}
+                        matterId={matter.id}
+                        comments={commentsByTask.get(task.id) ?? []}
+                      />
                     </li>
                   );
                 })}
@@ -360,21 +429,43 @@ export default async function MatterDetailPage({
         </TabsContent>
 
         <TabsContent value="agenda">
-          <EmptyState
-            title="Agenda (próximamente)"
-            description="Stub Fase 2: calendarios y audiencias llegan en fases posteriores."
-          />
+          {!matterEvents?.length ? (
+            <EmptyState
+              title="Sin eventos en este asunto"
+              description="Crea audiencias o reuniones desde Agenda y vincúlalas a este asunto."
+            />
+          ) : (
+            <ul className="grid gap-2">
+              {matterEvents.map((e) => (
+                <li key={e.id} className="surface rounded-md p-3 text-sm">
+                  <span className="badge mr-2">
+                    {labelOf(EVENT_TYPES, e.event_type)}
+                  </span>
+                  <span className="font-medium">{e.title}</span>
+                  <p className="mt-1 text-[var(--muted)]">
+                    {formatDateTime(e.starts_at)}
+                    {e.location ? ` · ${e.location}` : ""}
+                  </p>
+                </li>
+              ))}
+            </ul>
+          )}
+          <p className="mt-4">
+            <Link href="/agenda" className="text-sm text-[var(--gold-500)] hover:underline">
+              Abrir Agenda completa
+            </Link>
+          </p>
         </TabsContent>
         <TabsContent value="documentos">
           <EmptyState
             title="Documentos (próximamente)"
-            description="Stub Fase 2: Storage y expediente digital llegan después. Por ahora usa enlaces OneDrive en actuaciones."
+            description="Stub: Storage llega en fases posteriores. Por ahora usa enlaces OneDrive en actuaciones."
           />
         </TabsContent>
         <TabsContent value="tiempo">
           <EmptyState
             title="Tiempo (próximamente)"
-            description="Stub Fase 2: registro de horas se implementará en una fase posterior."
+            description="Stub: registro de horas en una fase posterior."
           />
         </TabsContent>
       </Tabs>

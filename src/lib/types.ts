@@ -21,12 +21,19 @@ export type MatterStage =
   | "ejecucion"
   | "cierre";
 export type MatterPriority = "baja" | "media" | "alta" | "urgente";
-export type TaskStatus = "pendiente" | "completada" | "cancelada";
+export type TaskStatus = "pendiente" | "en_curso" | "completada" | "cancelada";
+export type TaskPriority = "baja" | "media" | "alta" | "urgente";
 export type TeamRoleInMatter =
   | "responsable"
   | "colaborador"
   | "paralegal"
   | "observador";
+export type EventType =
+  | "audiencia"
+  | "reunion"
+  | "plazo"
+  | "interno"
+  | "otro";
 
 export type Member = {
   id: string;
@@ -113,6 +120,12 @@ export type Actuacion = {
   created_at: string;
 };
 
+export type ChecklistItem = {
+  id: string;
+  text: string;
+  done: boolean;
+};
+
 export type Task = {
   id: string;
   matter_id: string;
@@ -120,9 +133,58 @@ export type Task = {
   assignee_id: string;
   description: string;
   follow_up_date: string;
+  due_business_date: string | null;
+  priority: TaskPriority;
   status: TaskStatus;
+  checklist: ChecklistItem[];
   completed_at: string | null;
   completed_by: string | null;
   created_by: string;
+  created_at: string;
+  updated_at?: string;
+};
+
+export type TaskComment = {
+  id: string;
+  task_id: string;
+  author_id: string;
+  body: string;
+  mentioned_member_ids: string[];
+  created_at: string;
+};
+
+export type TaskTemplate = {
+  id: string;
+  name: string;
+  description: string;
+  priority: TaskPriority;
+  checklist: ChecklistItem[];
+  default_follow_up_offset_days: number;
+  area: string | null;
+  created_by: string;
+  created_at: string;
+};
+
+export type CalendarEvent = {
+  id: string;
+  matter_id: string | null;
+  title: string;
+  description: string | null;
+  starts_at: string;
+  ends_at: string | null;
+  all_day: boolean;
+  location: string | null;
+  event_type: EventType;
+  created_by: string;
+  created_at: string;
+  updated_at: string;
+};
+
+export type NonBusinessDay = {
+  id: string;
+  day: string;
+  name: string;
+  kind: "festivo_nacional" | "festivo_religioso" | "puente" | "otro";
+  notes: string | null;
   created_at: string;
 };

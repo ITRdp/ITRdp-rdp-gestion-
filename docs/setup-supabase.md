@@ -29,8 +29,9 @@ En **SQL Editor**, ejecuta **en orden**:
 
 1. `supabase/migrations/20261123000000_initial_schema.sql` — v1 (tablas base + RLS)
 2. `supabase/migrations/20261123010000_fase2_clients_matters.sql` — Fase 2 (clientes/asuntos ampliados)
+3. `supabase/migrations/20261123020000_fase3_agenda_tasks.sql` — Fase 3 (agenda, festivos, tareas)
 
-Detalle Fase 2: `docs/fase2-migracion.md`. Solo miembros con `enabled = true` operan sobre los datos del despacho.
+Detalle: `docs/fase2-migracion.md`, `docs/fase3-agenda-terminos.md`. Solo miembros con `enabled = true` operan sobre los datos del despacho.
 
 ## 3. Tres usuarios de prueba
 
@@ -68,7 +69,7 @@ npm run dev
 
 Abrir http://localhost:3000 → `/login`.
 
-Rutas: `/` (Mi jornada), `/asuntos`, `/asuntos/[id]`, `/clientes`, `/clientes/[id]`.
+Rutas: `/` (Mi jornada), `/agenda`, `/asuntos`, `/asuntos/[id]`, `/clientes`, `/clientes/[id]`.
 
 ## Notas
 
