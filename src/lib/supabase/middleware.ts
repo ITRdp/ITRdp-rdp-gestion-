@@ -31,12 +31,14 @@ export async function updateSession(request: NextRequest) {
 
   const path = request.nextUrl.pathname;
   const isLogin = path === "/login";
+  const isFase1Preview = path.startsWith("/dev/fase1-preview");
   const isPublicAsset =
     path.startsWith("/_next") ||
     path.startsWith("/favicon") ||
+    path.startsWith("/brand") ||
     path.includes(".");
 
-  if (isPublicAsset) {
+  if (isPublicAsset || isFase1Preview) {
     return supabaseResponse;
   }
 

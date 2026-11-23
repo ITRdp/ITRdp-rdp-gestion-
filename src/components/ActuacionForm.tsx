@@ -1,22 +1,37 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect } from "react";
+import { toast } from "sonner";
 import {
   createActuacionAction,
   type ActuacionState,
 } from "@/app/actions/actuaciones";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 const initial: ActuacionState = {};
 
 export function ActuacionForm({ matterId }: { matterId: string }) {
-  const [state, formAction, pending] = useActionState(createActuacionAction, initial);
+  const [state, formAction, pending] = useActionState(
+    createActuacionAction,
+    initial,
+  );
+
+  useEffect(() => {
+    if (state.success) toast.success(state.success);
+    if (state.error) toast.error(state.error);
+  }, [state]);
 
   return (
-    <form action={formAction} className="surface grid gap-4 p-5">
+    <form action={formAction} className="surface grid gap-4 rounded-md p-5">
       <div>
-        <h3 className="font-display text-lg text-[var(--wine)]">Registrar actuación</h3>
+        <h3 className="font-display text-lg text-[var(--wine-900)]">
+          Registrar actuación
+        </h3>
         <p className="hint mt-1">
-          Documenta la gestión realizada. Puedes enlazar un documento en OneDrive.
+          Documenta la gestión realizada. Puedes enlazar un documento en
+          OneDrive.
         </p>
       </div>
 
@@ -30,7 +45,7 @@ export function ActuacionForm({ matterId }: { matterId: string }) {
       {state.success && <div className="alert alert-ok">{state.success}</div>}
 
       <div className="field">
-        <label htmlFor="description">Descripción</label>
+        <Label htmlFor="description">Descripción</Label>
         <textarea
           id="description"
           name="description"
@@ -40,8 +55,8 @@ export function ActuacionForm({ matterId }: { matterId: string }) {
       </div>
 
       <div className="field">
-        <label htmlFor="onedrive_url">Enlace OneDrive (opcional)</label>
-        <input
+        <Label htmlFor="onedrive_url">Enlace OneDrive (opcional)</Label>
+        <Input
           id="onedrive_url"
           name="onedrive_url"
           type="url"
@@ -49,9 +64,9 @@ export function ActuacionForm({ matterId }: { matterId: string }) {
         />
       </div>
 
-      <button type="submit" className="btn btn-primary w-fit" disabled={pending}>
+      <Button type="submit" className="w-fit" disabled={pending}>
         {pending ? "Guardando…" : "Guardar actuación"}
-      </button>
+      </Button>
     </form>
   );
 }

@@ -1,10 +1,10 @@
-const dateFmt = new Intl.DateTimeFormat("es-ES", {
+const dateFmt = new Intl.DateTimeFormat("es-CO", {
   day: "2-digit",
   month: "short",
   year: "numeric",
 });
 
-const dateTimeFmt = new Intl.DateTimeFormat("es-ES", {
+const dateTimeFmt = new Intl.DateTimeFormat("es-CO", {
   day: "2-digit",
   month: "short",
   year: "numeric",

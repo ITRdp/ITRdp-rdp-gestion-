@@ -60,17 +60,17 @@ En **Authentication → Users → Add user** crea tres cuentas (email + password
 
 | Correo | Nombre sugerido | Rol |
 |---|---|---|
-| `abogado1@despacho.local` | Ana Ruiz | admin |
-| `abogado2@despacho.local` | Luis Martín | abogado |
-| `paralegal@despacho.local` | María López | paralegal |
+| `abogado1@despacho.co` | Ana Ruiz | admin |
+| `abogado2@despacho.co` | Luis Martín | abogado |
+| `paralegal@despacho.co` | María López | paralegal |
 
 Copia el **UUID** de cada usuario y, en el SQL Editor, ejecuta (sustituyendo los UUID):
 
 ```sql
 insert into public.members (id, email, full_name, role, enabled) values
-  ('UUID-DE-ANA', 'abogado1@despacho.local', 'Ana Ruiz', 'admin', true),
-  ('UUID-DE-LUIS', 'abogado2@despacho.local', 'Luis Martín', 'abogado', true),
-  ('UUID-DE-MARIA', 'paralegal@despacho.local', 'María López', 'paralegal', true);
+  ('UUID-DE-ANA', 'abogado1@despacho.co', 'Ana Ruiz', 'admin', true),
+  ('UUID-DE-LUIS', 'abogado2@despacho.co', 'Luis Martín', 'abogado', true),
+  ('UUID-DE-MARIA', 'paralegal@despacho.co', 'María López', 'paralegal', true);
 ```
 
 Sin fila en `members` con `enabled = true`, el login falla aunque Auth acepte la contraseña.
@@ -119,9 +119,14 @@ Pantallas:
 
 ```
 src/app/                 # Rutas y Server Actions
-src/components/          # Formularios y navegación
+src/components/          # AppShell, formularios, UI shadcn
+src/fonts/               # Cormorant Garamond + Open Sans (locales)
+public/brand/            # Monograma, wordmark, textura, favicon
 src/lib/supabase/        # Clientes browser / server / middleware
 supabase/migrations/     # Schema + RLS
 .env.example             # Nombres de variables (sin secretos)
-docs/setup-supabase.md   # Misma guía de puesta en marcha
+docs/brand.md            # Tokens, tipografías, logo do/don’t
+docs/setup-supabase.md   # Guía de puesta en marcha
 ```
+
+Marca: vino `#340613` / `#511521` / `#430E1B`, dorado `#D49F69`, fondo `#FBF9F8`. Ver `docs/brand.md`.

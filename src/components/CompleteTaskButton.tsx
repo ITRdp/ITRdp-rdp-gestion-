@@ -1,7 +1,9 @@
 "use client";
 
 import { useTransition } from "react";
+import { toast } from "sonner";
 import { completeTaskAction } from "@/app/actions/tasks";
+import { Button } from "@/components/ui/button";
 
 export function CompleteTaskButton({
   taskId,
@@ -13,17 +15,22 @@ export function CompleteTaskButton({
   const [pending, startTransition] = useTransition();
 
   return (
-    <button
+    <Button
       type="button"
-      className="btn btn-primary text-sm"
+      size="sm"
       disabled={pending}
       onClick={() =>
         startTransition(async () => {
-          await completeTaskAction(taskId, matterId);
+          try {
+            await completeTaskAction(taskId, matterId);
+            toast.success("Tarea marcada como completada");
+          } catch {
+            toast.error("No se pudo completar la tarea");
+          }
         })
       }
     >
       {pending ? "Completando…" : "Marcar completada"}
-    </button>
+    </Button>
   );
 }
