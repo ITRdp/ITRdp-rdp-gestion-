@@ -1,10 +1,10 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { softDeleteMatterAction } from "@/app/actions/matters";
 import { ActuacionForm } from "@/components/ActuacionForm";
 import { ActivityTimeline } from "@/components/activity/activity-timeline";
 import { AppShellHost as AppShell } from "@/components/AppShellHost";
 import { CompleteTaskButton } from "@/components/CompleteTaskButton";
+import { ConfirmArchiveButton } from "@/components/ConfirmArchiveButton";
 import { DocumentsPanel } from "@/components/documents/documents-panel";
 import { EmptyState } from "@/components/EmptyState";
 import { MatterEditForm } from "@/components/MatterEditForm";
@@ -17,7 +17,6 @@ import {
   TaskStatusSelect,
 } from "@/components/TaskExtras";
 import { TimePanel } from "@/components/time/time-panel";
-import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { requireMember } from "@/lib/auth";
 import { holidaySet } from "@/lib/business-days";
@@ -312,17 +311,7 @@ export default async function MatterDetailPage({
               members={(members ?? []) as Member[]}
             />
             {member.role === "admin" ? (
-              <form
-                action={async () => {
-                  "use server";
-                  await softDeleteMatterAction(id);
-                }}
-                className="mt-4"
-              >
-                <Button type="submit" variant="destructive" size="sm">
-                  Soft delete (solo admin)
-                </Button>
-              </form>
+              <ConfirmArchiveButton matterId={matter.id} />
             ) : null}
           </div>
         </TabsContent>

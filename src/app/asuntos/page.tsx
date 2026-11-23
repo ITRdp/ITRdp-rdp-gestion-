@@ -101,14 +101,11 @@ export default async function AsuntosPage({
     <AppShell member={member}>
       <header className="fade-in mb-6 flex flex-wrap items-end justify-between gap-3">
         <div>
-          <p className="text-xs tracking-[0.2em] uppercase text-[var(--gold-400)]">
-            Despacho
-          </p>
           <h1 className="font-display mt-1 text-3xl text-[var(--wine-900)] sm:text-4xl">
             Asuntos
           </h1>
           <p className="mt-2 max-w-2xl text-[var(--muted)]">
-            Tabla y Kanban por etapa. Filtros reflejados en la URL.
+            Vista en tabla o tablero por etapa. Filtra por estado, área o cliente.
           </p>
         </div>
         {canWrite ? (

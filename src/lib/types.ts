@@ -19,7 +19,26 @@ export type MatterStage =
   | "alegatos"
   | "fallo"
   | "ejecucion"
+  | "gestiones_adicionales"
   | "cierre";
+
+export type MatterProcedureType =
+  | "judicial"
+  | "arbitral"
+  | "administrativo"
+  | "insolvencia_liquidacion"
+  | "extrajudicial"
+  | "contractual"
+  | "consultoria";
+
+export type MatterStageDef = {
+  id: string;
+  matter_type: MatterProcedureType;
+  stage_key: string;
+  label: string;
+  sort_order: number;
+  enabled: boolean;
+};
 export type MatterPriority = "baja" | "media" | "alta" | "urgente";
 export type TaskStatus = "pendiente" | "en_curso" | "completada" | "cancelada";
 export type TaskPriority = "baja" | "media" | "alta" | "urgente";
@@ -43,6 +62,7 @@ export type Member = {
   enabled: boolean;
   email_daily_digest?: boolean;
   notify_in_app?: boolean;
+  must_change_password?: boolean;
   created_at: string;
 };
 

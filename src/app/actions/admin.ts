@@ -83,6 +83,7 @@ export async function inviteMemberAction(
       enabled: true,
       email_daily_digest: false,
       notify_in_app: true,
+      must_change_password: true,
     },
     { onConflict: "id" },
   );
@@ -105,13 +106,26 @@ export async function updateMemberRoleAction(
   memberId: string,
   role: MemberRole,
 ): Promise<FormState> {
-  const admin = await requireAdmin();
+  await requireAdmin();
   if (!isRole(role)) return { error: "Rol inválido." };
-  if (memberId === admin.id && role !== "admin") {
-    return { error: "No puedes quitarte el rol admin a ti mismo." };
-  }
 
   const supabase = await createClient();
+
+  if (role !== "admin") {
+    const { data: admins } = await supabase
+      .from("members")
+      .select("id")
+      .eq("role", "admin")
+      .eq("enabled", true);
+    const onlyAdmin =
+      (admins?.length ?? 0) === 1 && admins?.[0]?.id === memberId;
+    if (onlyAdmin) {
+      return {
+        error: "No puedes quitar el rol admin al único administrador activo.",
+      };
+    }
+  }
+
   const { error } = await supabase
     .from("members")
     .update({ role })
@@ -132,6 +146,27 @@ export async function setMemberEnabledAction(
   }
 
   const supabase = await createClient();
+
+  if (!enabled) {
+    const { data: target } = await supabase
+      .from("members")
+      .select("role")
+      .eq("id", memberId)
+      .maybeSingle();
+    if (target?.role === "admin") {
+      const { data: admins } = await supabase
+        .from("members")
+        .select("id")
+        .eq("role", "admin")
+        .eq("enabled", true);
+      if ((admins?.length ?? 0) <= 1) {
+        return {
+          error: "No puedes deshabilitar al único administrador activo.",
+        };
+      }
+    }
+  }
+
   const { error } = await supabase
     .from("members")
     .update({ enabled })
@@ -186,6 +221,22 @@ export async function deleteNonBusinessDayAction(
   revalidatePath("/admin");
   revalidatePath("/agenda");
   return { success: "Día eliminado." };
+}
+
+export async function updateStageDefAction(
+  id: string,
+  patch: { label?: string; enabled?: boolean; sort_order?: number },
+): Promise<FormState> {
+  await requireAdmin();
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("matter_stage_defs")
+    .update(patch)
+    .eq("id", id);
+  if (error) return { error: error.message };
+  revalidatePath("/admin");
+  revalidatePath("/asuntos");
+  return { success: "Etapa actualizada." };
 }
 
 export async function updateMyNotificationPrefsAction(

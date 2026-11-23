@@ -9,9 +9,9 @@ import { Label } from "@/components/ui/label";
 import {
   MATTER_AREAS,
   MATTER_PRIORITIES,
+  MATTER_PROCEDURE_TYPES,
   MATTER_STAGES,
   MATTER_STATUSES,
-  MATTER_TYPES_BY_AREA,
 } from "@/lib/catalogs";
 import type { Client, Matter, Member } from "@/lib/types";
 
@@ -28,10 +28,7 @@ export function MatterEditForm({
 }) {
   const [state, formAction, pending] = useActionState(updateMatterAction, initial);
   const [area, setArea] = useState(matter.area);
-  const types = useMemo(
-    () => MATTER_TYPES_BY_AREA[area] ?? MATTER_TYPES_BY_AREA.otro,
-    [area],
-  );
+  const types = useMemo(() => [...MATTER_PROCEDURE_TYPES], []);
 
   useEffect(() => {
     if (state.success) toast.success(state.success);

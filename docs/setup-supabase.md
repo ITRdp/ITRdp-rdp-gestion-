@@ -33,8 +33,9 @@ En **SQL Editor**, ejecuta **en orden**:
 4. `supabase/migrations/20261123030000_fase4_activity_docs_time.sql` — Fase 4 (activity_log, documentos, tiempo)
 5. `supabase/migrations/20261123040000_fase5_admin_rls_notifications.sql` — Fase 5 (admin, RLS por rol, notificaciones)
 6. `supabase/migrations/20261123120000_fix_festivos_areas_protect.sql` — Fix post Fase 5 (festivos 2027, áreas firma, protect members)
+7. `supabase/migrations/20261123140000_prelanzamiento_stages.sql` — Etapas por tipo + must_change_password
 
-Detalle: `docs/fase2-migracion.md`, `docs/fase2-catalogos.md`, `docs/fase3-agenda-terminos.md`, `docs/fase4-actividad-docs-tiempo.md`, `docs/fase5-admin-permisos-avisos.md`. Solo miembros con `enabled = true` operan sobre los datos del despacho.
+Detalle: `docs/fase2-migracion.md`, `docs/fase2-catalogos.md`, `docs/fase3-agenda-terminos.md`, `docs/fase4-actividad-docs-tiempo.md`, `docs/fase5-admin-permisos-avisos.md`, `docs/produccion.md`. Solo miembros con `enabled = true` operan sobre los datos del despacho.
 
 **Storage (Fase 4):** confirma el bucket privado `matter-documents` en Dashboard → Storage (o créalo a mano si el `DO` de la migración no corrió).
 

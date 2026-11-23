@@ -85,8 +85,7 @@ export default async function JornadaPage() {
           Mi jornada
         </h1>
         <p className="mt-2 max-w-2xl text-[var(--muted)]">
-          Tareas, semáforo por días hábiles CO, eventos próximos y plazos
-          procesales de la semana.
+          Pendientes del día, plazos y próximos eventos.
         </p>
       </header>
 

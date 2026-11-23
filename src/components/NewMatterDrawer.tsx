@@ -18,9 +18,9 @@ import {
 import {
   MATTER_AREAS,
   MATTER_PRIORITIES,
+  MATTER_PROCEDURE_TYPES,
   MATTER_STAGES,
   MATTER_STATUSES,
-  MATTER_TYPES_BY_AREA,
 } from "@/lib/catalogs";
 import type { Client, Member } from "@/lib/types";
 
@@ -38,14 +38,12 @@ export function NewMatterDrawer({
   defaultClientId?: string;
 }) {
   const [open, setOpen] = useState(false);
-  const [area, setArea] = useState("comercial");
+  const [area, setArea] = useState("empresa");
+  const [teamIds, setTeamIds] = useState<string[]>([]);
   const [clientMode, setClientMode] = useState<"existing" | "new">("existing");
   const [state, formAction, pending] = useActionState(createMatterAction, initial);
 
-  const types = useMemo(
-    () => MATTER_TYPES_BY_AREA[area] ?? MATTER_TYPES_BY_AREA.otro,
-    [area],
-  );
+  const types = useMemo(() => [...MATTER_PROCEDURE_TYPES], []);
 
   useEffect(() => {
     if (state.error) toast.error(state.error);
@@ -162,7 +160,11 @@ export function NewMatterDrawer({
               </div>
               <div className="field">
                 <Label htmlFor="matter_type">Tipo</Label>
-                <select id="matter_type" name="matter_type" defaultValue="general">
+                <select
+                  id="matter_type"
+                  name="matter_type"
+                  defaultValue="judicial"
+                >
                   {types.map((t) => (
                     <option key={t.value} value={t.value}>
                       {t.label}
@@ -218,15 +220,52 @@ export function NewMatterDrawer({
             </div>
 
             <div className="field">
-              <Label htmlFor="team_member_ids">Equipo (IDs, opcional)</Label>
-              <Input
-                id="team_member_ids"
+              <Label>Equipo (opcional)</Label>
+              <input
+                type="hidden"
                 name="team_member_ids"
-                placeholder="UUID separados por coma"
+                value={teamIds.join(",")}
               />
-              <p className="hint">
-                Alternativa: añade miembros desde la ficha del asunto.
-              </p>
+              <ul className="mt-1 grid max-h-40 gap-1 overflow-y-auto rounded-md border border-[var(--line)] p-2">
+                {members
+                  .filter((m) => m.id !== currentMemberId)
+                  .map((m) => {
+                    const checked = teamIds.includes(m.id);
+                    return (
+                      <li key={m.id}>
+                        <label className="flex cursor-pointer items-center gap-2 rounded px-2 py-1.5 text-sm hover:bg-[var(--surface)]">
+                          <input
+                            type="checkbox"
+                            checked={checked}
+                            onChange={() =>
+                              setTeamIds((prev) =>
+                                checked
+                                  ? prev.filter((id) => id !== m.id)
+                                  : [...prev, m.id],
+                              )
+                            }
+                          />
+                          <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[var(--wine-100)] text-xs font-semibold text-[var(--wine-900)]">
+                            {m.full_name
+                              .split(" ")
+                              .map((p) => p[0])
+                              .slice(0, 2)
+                              .join("")
+                              .toUpperCase()}
+                          </span>
+                          <span className="min-w-0 flex-1">
+                            <span className="block truncate font-medium">
+                              {m.full_name}
+                            </span>
+                            <span className="block text-xs capitalize text-[var(--muted)]">
+                              {m.role}
+                            </span>
+                          </span>
+                        </label>
+                      </li>
+                    );
+                  })}
+              </ul>
             </div>
 
             <div className="field">
@@ -234,19 +273,22 @@ export function NewMatterDrawer({
               <Input
                 id="counterparts"
                 name="counterparts"
-                placeholder="Nombre(s) separados por coma"
+                placeholder="Nombre; otro nombre"
               />
+              <p className="hint">Separa nombres con punto y coma.</p>
             </div>
 
             <div className="grid gap-3 sm:grid-cols-2">
               <div className="field">
-                <Label htmlFor="radicado">Radicado (hasta 23 dígitos)</Label>
+                <Label htmlFor="radicado">Radicado (23 dígitos)</Label>
                 <Input
                   id="radicado"
                   name="radicado"
                   inputMode="numeric"
                   maxLength={23}
+                  pattern="\d{23}"
                   placeholder="Opcional"
+                  className="tabular-nums"
                 />
               </div>
               <div className="field">

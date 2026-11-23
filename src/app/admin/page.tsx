@@ -5,11 +5,12 @@ import {
   InviteMemberForm,
   MembersTable,
   NotificationPrefsForm,
+  StagesAdmin,
 } from "@/components/admin/admin-panels";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { requireAdmin } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
-import type { Member, NonBusinessDay } from "@/lib/types";
+import type { Member, MatterStageDef, NonBusinessDay } from "@/lib/types";
 
 export default async function AdminPage({
   searchParams,
@@ -20,22 +21,25 @@ export default async function AdminPage({
   const { tab } = await searchParams;
   const supabase = await createClient();
 
-  const [{ data: members }, { data: holidays }] = await Promise.all([
-    supabase.from("members").select("*").order("full_name"),
-    supabase
-      .from("non_business_days")
-      .select("*")
-      .order("day", { ascending: true }),
-  ]);
+  const [{ data: members }, { data: holidays }, { data: stages }] =
+    await Promise.all([
+      supabase.from("members").select("*").order("full_name"),
+      supabase
+        .from("non_business_days")
+        .select("*")
+        .order("day", { ascending: true }),
+      supabase
+        .from("matter_stage_defs")
+        .select("*")
+        .order("matter_type")
+        .order("sort_order"),
+    ]);
 
   const defaultTab = tab ?? "miembros";
 
   return (
     <AppShellHost member={admin}>
       <header className="mb-6">
-        <p className="text-xs tracking-[0.2em] uppercase text-[var(--gold-400)]">
-          Despacho
-        </p>
         <h1 className="font-display text-3xl text-[var(--wine-900)] sm:text-4xl">
           Administración
         </h1>
@@ -65,7 +69,8 @@ export default async function AdminPage({
           <HolidaysAdmin days={(holidays ?? []) as NonBusinessDay[]} />
         </TabsContent>
 
-        <TabsContent value="catalogos">
+        <TabsContent value="catalogos" className="grid gap-8">
+          <StagesAdmin stages={(stages ?? []) as MatterStageDef[]} />
           <CatalogsReference />
         </TabsContent>
 

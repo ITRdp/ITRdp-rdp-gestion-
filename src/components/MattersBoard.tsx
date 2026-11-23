@@ -181,21 +181,35 @@ export function MattersBoard({ matters }: { matters: MatterRow[] }) {
                       <select
                         className="mt-2 w-full rounded border border-[var(--line)] bg-white px-2 py-1 text-xs"
                         disabled={pending}
-                        value={m.stage}
-                        onChange={(e) =>
+                        defaultValue=""
+                        onChange={(e) => {
+                          const next = e.target.value as MatterStage;
+                          e.target.value = "";
+                          if (!next || next === m.stage) return;
+                          const label = labelOf(MATTER_STAGES, next);
+                          if (
+                            !window.confirm(
+                              `¿Mover el asunto a la etapa «${label}»?`,
+                            )
+                          ) {
+                            return;
+                          }
                           startTransition(async () => {
                             await updateMatterStageStatusAction(m.id, {
-                              stage: e.target.value as MatterStage,
+                              stage: next,
                             });
                             router.refresh();
-                          })
-                        }
+                          });
+                        }}
                       >
-                        {MATTER_STAGES.map((s) => (
-                          <option key={s.value} value={s.value}>
-                            Mover a {s.label}
-                          </option>
-                        ))}
+                        <option value="">Cambiar etapa…</option>
+                        {MATTER_STAGES.filter((s) => s.value !== m.stage).map(
+                          (s) => (
+                            <option key={s.value} value={s.value}>
+                              {s.label}
+                            </option>
+                          ),
+                        )}
                       </select>
                     </li>
                   ))}
@@ -227,7 +241,7 @@ export function MattersBoard({ matters }: { matters: MatterRow[] }) {
                   key={m.id}
                   className="border-b border-[var(--line)] last:border-0 hover:bg-[var(--gold-50)]/40"
                 >
-                  <td className="px-3 py-2 font-medium text-[var(--wine-900)]">
+                  <td className="matter-code px-3 py-2 font-medium text-[var(--wine-900)]">
                     <Link href={`/asuntos/${m.id}`} className="hover:underline">
                       {m.code}
                     </Link>
@@ -240,55 +254,21 @@ export function MattersBoard({ matters }: { matters: MatterRow[] }) {
                   <td className="px-3 py-2 text-[var(--muted)]">{m.clientName}</td>
                   <td className="px-3 py-2">{labelOf(MATTER_AREAS, m.area)}</td>
                   <td className="px-3 py-2">
-                    <select
-                      className="rounded border border-[var(--line)] bg-white px-1 py-0.5 text-xs"
-                      disabled={pending}
-                      value={m.stage}
-                      onChange={(e) =>
-                        startTransition(async () => {
-                          await updateMatterStageStatusAction(m.id, {
-                            stage: e.target.value as MatterStage,
-                          });
-                          router.refresh();
-                        })
-                      }
-                    >
-                      {MATTER_STAGES.map((s) => (
-                        <option key={s.value} value={s.value}>
-                          {s.label}
-                        </option>
-                      ))}
-                    </select>
+                    <span className="badge">{labelOf(MATTER_STAGES, m.stage)}</span>
                   </td>
                   <td className="px-3 py-2">
-                    <select
-                      className="rounded border border-[var(--line)] bg-white px-1 py-0.5 text-xs capitalize"
-                      disabled={pending}
-                      value={m.status}
-                      onChange={(e) =>
-                        startTransition(async () => {
-                          await updateMatterStageStatusAction(m.id, {
-                            status: e.target.value as MatterStatus,
-                          });
-                          router.refresh();
-                        })
-                      }
-                    >
-                      {MATTER_STATUSES.map((s) => (
-                        <option key={s.value} value={s.value}>
-                          {s.label}
-                        </option>
-                      ))}
-                    </select>
+                    <span className="badge capitalize">
+                      {labelOf(MATTER_STATUSES, m.status)}
+                    </span>
                   </td>
                   <td className="px-3 py-2 capitalize">
                     {labelOf(MATTER_PRIORITIES, m.priority)}
                   </td>
                   <td className="px-3 py-2">{m.responsibleName}</td>
-                  <td className="px-3 py-2">
+                  <td className="px-3 py-2 tabular-nums">
                     {formatDate(m.procedural_deadline)}
                   </td>
-                  <td className="px-3 py-2">{formatCOP(m.amount_cop)}</td>
+                  <td className="money px-3 py-2">{formatCOP(m.amount_cop)}</td>
                 </tr>
               ))}
             </tbody>

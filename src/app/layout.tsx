@@ -53,8 +53,12 @@ const body = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "RDP Gestión",
+  title: {
+    default: "RDP Gestión",
+    template: "%s · RDP Gestión",
+  },
   description: "Gestión interna de asuntos — Rojas & De Paz Abogados S.A.S.",
+  robots: { index: false, follow: false, googleBot: { index: false, follow: false } },
   icons: {
     icon: [{ url: "/favicon.png", type: "image/png" }],
     apple: [{ url: "/brand/favicon.png" }],

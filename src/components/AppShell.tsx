@@ -122,15 +122,11 @@ export function AppShell({
           />
           {!collapsed && (
             <div className="min-w-0">
-              <Image
-                src="/brand/wordmark-white.png"
-                alt="Rojas & De Paz Abogados S.A.S."
-                width={160}
-                height={48}
-                className="h-8 w-auto max-w-[9.5rem] object-contain object-left"
-              />
-              <p className="mt-1 text-[10px] uppercase tracking-[0.18em] text-[var(--gold-400)]">
-                Gestión
+              <p className="font-display text-lg leading-tight text-[var(--surface)]">
+                RDP Gestión
+              </p>
+              <p className="mt-0.5 text-[10px] uppercase tracking-[0.16em] text-[var(--gold-400)]">
+                Rojas &amp; De Paz
               </p>
             </div>
           )}

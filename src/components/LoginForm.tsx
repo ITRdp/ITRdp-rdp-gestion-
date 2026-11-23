@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useActionState } from "react";
 import { loginAction, type AuthState } from "@/app/actions/auth";
 import { Button } from "@/components/ui/button";
@@ -44,12 +45,21 @@ export function LoginForm({ disabledHint }: { disabledHint?: boolean }) {
         />
       </div>
 
+      <div className="text-right">
+        <Link
+          href="/olvidaste"
+          className="text-sm text-[var(--gold-500)] hover:underline"
+        >
+          ¿Olvidaste tu contraseña?
+        </Link>
+      </div>
+
       <Button type="submit" disabled={pending} className="w-full">
         {pending ? "Accediendo…" : "Entrar"}
       </Button>
 
       <p className="hint text-center">
-        No hay registro público. Solo miembros habilitados por un administrador.
+        Acceso exclusivo para miembros del despacho.
       </p>
     </form>
   );

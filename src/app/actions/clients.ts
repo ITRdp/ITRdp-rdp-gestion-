@@ -2,10 +2,16 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { requireMember } from "@/lib/auth";
+import { canManageClientsMatters, requireMember } from "@/lib/auth";
 import { nitCheckDigit } from "@/lib/nit";
 import { createClient } from "@/lib/supabase/server";
 import type { DocumentType, PersonType } from "@/lib/types";
+import {
+  documentNumberSchema,
+  emailSchema,
+  phoneCoSchema,
+  verifyNitDv,
+} from "@/lib/validators";
 
 export type FormState = { error?: string; success?: string };
 export type ClientMatterState = FormState;
@@ -24,19 +30,42 @@ export async function createClientAction(
   formData: FormData,
 ): Promise<FormState> {
   const member = await requireMember();
+  if (!canManageClientsMatters(member)) {
+    return { error: "No tienes permiso para crear clientes." };
+  }
   const supabase = await createClient();
 
   const personType = (str(formData, "person_type") || "juridica") as PersonType;
   const documentType = (str(formData, "document_type") || "NIT") as DocumentType;
-  const documentNumber = nullStr(formData, "document_number");
-  let documentDv = nullStr(formData, "document_dv");
   const name = str(formData, "name");
   const legalName = nullStr(formData, "legal_name") || name;
 
   if (!name) return { error: "El nombre o razón social es obligatorio." };
 
-  if (documentType === "NIT" && documentNumber && !documentDv) {
-    documentDv = nitCheckDigit(documentNumber);
+  const docParsed = documentNumberSchema(documentType).safeParse(
+    str(formData, "document_number"),
+  );
+  if (!docParsed.success) {
+    return { error: docParsed.error.issues[0]?.message ?? "Documento inválido." };
+  }
+  const documentNumber = docParsed.data;
+  let documentDv = nullStr(formData, "document_dv");
+
+  if (documentType === "NIT") {
+    const expected = nitCheckDigit(documentNumber);
+    if (!documentDv) documentDv = expected;
+    else if (!verifyNitDv(documentNumber, documentDv)) {
+      return { error: `Dígito de verificación incorrecto. Debe ser ${expected}.` };
+    }
+  }
+
+  const phoneParsed = phoneCoSchema.safeParse(nullStr(formData, "phone"));
+  if (!phoneParsed.success) {
+    return { error: phoneParsed.error.issues[0]?.message ?? "Teléfono inválido." };
+  }
+  const emailParsed = emailSchema.safeParse(str(formData, "email"));
+  if (!emailParsed.success) {
+    return { error: emailParsed.error.issues[0]?.message ?? "Correo inválido." };
   }
 
   const { data, error } = await supabase
@@ -51,8 +80,8 @@ export async function createClientAction(
       city: nullStr(formData, "city"),
       department: nullStr(formData, "department"),
       address: nullStr(formData, "address"),
-      email: nullStr(formData, "email"),
-      phone: nullStr(formData, "phone"),
+      email: emailParsed.data,
+      phone: phoneParsed.data,
       notes: nullStr(formData, "notes"),
       created_by: member.id,
     })
@@ -84,19 +113,41 @@ export async function updateClientAction(
   formData: FormData,
 ): Promise<FormState> {
   const member = await requireMember();
+  if (!canManageClientsMatters(member)) {
+    return { error: "No tienes permiso para editar clientes." };
+  }
   const supabase = await createClient();
   const id = str(formData, "id");
   if (!id) return { error: "Cliente no válido." };
 
   const personType = (str(formData, "person_type") || "juridica") as PersonType;
   const documentType = (str(formData, "document_type") || "NIT") as DocumentType;
-  const documentNumber = nullStr(formData, "document_number");
-  let documentDv = nullStr(formData, "document_dv");
   const name = str(formData, "name");
 
   if (!name) return { error: "El nombre o razón social es obligatorio." };
-  if (documentType === "NIT" && documentNumber && !documentDv) {
-    documentDv = nitCheckDigit(documentNumber);
+
+  const docParsed = documentNumberSchema(documentType).safeParse(
+    str(formData, "document_number"),
+  );
+  if (!docParsed.success) {
+    return { error: docParsed.error.issues[0]?.message ?? "Documento inválido." };
+  }
+  const documentNumber = docParsed.data;
+  let documentDv = nullStr(formData, "document_dv");
+  if (documentType === "NIT") {
+    const expected = nitCheckDigit(documentNumber);
+    if (!documentDv) documentDv = expected;
+    else if (!verifyNitDv(documentNumber, documentDv)) {
+      return { error: `Dígito de verificación incorrecto. Debe ser ${expected}.` };
+    }
+  }
+  const phoneParsed = phoneCoSchema.safeParse(nullStr(formData, "phone"));
+  if (!phoneParsed.success) {
+    return { error: phoneParsed.error.issues[0]?.message ?? "Teléfono inválido." };
+  }
+  const emailParsed = emailSchema.safeParse(str(formData, "email"));
+  if (!emailParsed.success) {
+    return { error: emailParsed.error.issues[0]?.message ?? "Correo inválido." };
   }
 
   const { error } = await supabase
@@ -111,8 +162,8 @@ export async function updateClientAction(
       city: nullStr(formData, "city"),
       department: nullStr(formData, "department"),
       address: nullStr(formData, "address"),
-      email: nullStr(formData, "email"),
-      phone: nullStr(formData, "phone"),
+      email: emailParsed.data,
+      phone: phoneParsed.data,
       notes: nullStr(formData, "notes"),
       updated_at: new Date().toISOString(),
     })

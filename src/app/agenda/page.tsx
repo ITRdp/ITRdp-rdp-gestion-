@@ -50,15 +50,11 @@ export default async function AgendaPage({
   return (
     <AppShell member={member}>
       <header className="fade-in mb-6">
-        <p className="text-xs tracking-[0.2em] uppercase text-[var(--gold-400)]">
-          Despacho
-        </p>
         <h1 className="font-display mt-1 text-3xl text-[var(--wine-900)] sm:text-4xl">
           Agenda
         </h1>
         <p className="mt-2 max-w-2xl text-[var(--muted)]">
-          Mes, semana y lista. Festivos Colombia (seed 2026–2027) marcados para
-          validación.
+          Calendario del despacho: audiencias, reuniones y plazos.
         </p>
       </header>
 

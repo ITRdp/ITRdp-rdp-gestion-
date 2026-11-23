@@ -31,6 +31,12 @@ export async function updateSession(request: NextRequest) {
 
   const path = request.nextUrl.pathname;
   const isLogin = path === "/login";
+  const isAuthPublic =
+    isLogin ||
+    path === "/olvidaste" ||
+    path === "/restablecer" ||
+    path.startsWith("/auth/");
+  const isPrimerIngreso = path === "/primer-ingreso";
   const isDevPreview = path.startsWith("/dev/fase");
   const isPublicAsset =
     path.startsWith("/_next") ||
@@ -42,7 +48,7 @@ export async function updateSession(request: NextRequest) {
     return supabaseResponse;
   }
 
-  if (!user && !isLogin) {
+  if (!user && !isAuthPublic) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     return NextResponse.redirect(url);
@@ -66,9 +72,31 @@ export async function updateSession(request: NextRequest) {
     }
 
     if (enabled && isLogin) {
+      const { data: full } = await supabase
+        .from("members")
+        .select("must_change_password")
+        .eq("id", user.id)
+        .maybeSingle();
       const url = request.nextUrl.clone();
-      url.pathname = "/";
+      url.pathname = full?.must_change_password ? "/primer-ingreso" : "/";
       return NextResponse.redirect(url);
+    }
+
+    if (
+      enabled &&
+      !isPrimerIngreso &&
+      !isAuthPublic
+    ) {
+      const { data: full } = await supabase
+        .from("members")
+        .select("must_change_password")
+        .eq("id", user.id)
+        .maybeSingle();
+      if (full?.must_change_password) {
+        const url = request.nextUrl.clone();
+        url.pathname = "/primer-ingreso";
+        return NextResponse.redirect(url);
+      }
     }
   }
 

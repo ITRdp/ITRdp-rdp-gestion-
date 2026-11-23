@@ -1,23 +1,12 @@
 import type { ActivityLogEntry } from "@/lib/types";
+import {
+  actionLabel,
+  activityKindLabel,
+  actorDisplayName,
+  entityLabel,
+} from "@/lib/activity-labels";
 import { formatDateTime } from "@/lib/format";
 import { EmptyState } from "@/components/EmptyState";
-
-const ACTION_LABEL: Record<string, string> = {
-  created: "Creación",
-  updated: "Actualización",
-  deleted: "Eliminación",
-  soft_deleted: "Archivado",
-  status_changed: "Cambio de estado",
-  assigned: "Asignación",
-  completed: "Completado",
-  document_added: "Documento",
-  document_removed: "Documento archivado",
-  time_logged: "Tiempo",
-  started: "Inicio",
-  stopped: "Cierre",
-  actuacion_added: "Actuación",
-  note: "Nota",
-};
 
 export function ActivityTimeline({
   entries,
@@ -45,20 +34,21 @@ export function ActivityTimeline({
           />
           <div className="flex flex-wrap items-baseline justify-between gap-2">
             <p className="text-sm font-medium text-[var(--ink)]">
-              {ACTION_LABEL[e.action] ?? e.action}
-              <span className="ml-2 font-normal text-[var(--muted)]">
-                · {e.entity_type}
-              </span>
+              {activityKindLabel(e.entity_type, e.action)}
             </p>
-            <time className="text-xs text-[var(--muted)]">
+            <time className="tabular-nums text-xs text-[var(--muted)]">
               {formatDateTime(e.created_at)}
             </time>
           </div>
           <p className="mt-0.5 text-sm text-[var(--ink)]">{e.summary}</p>
           <p className="mt-1 text-xs text-[var(--muted)]">
-            {e.actor_id
-              ? actorNames[e.actor_id] ?? "Miembro"
-              : "Sistema"}
+            {actorDisplayName(
+              e.actor_id ? actorNames[e.actor_id] : null,
+              e.actor_id,
+            )}
+            <span className="sr-only">
+              {entityLabel(e.entity_type)} {actionLabel(e.action)}
+            </span>
           </p>
         </li>
       ))}

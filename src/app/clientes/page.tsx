@@ -37,9 +37,6 @@ export default async function ClientesPage({
     <AppShell member={member}>
       <header className="fade-in mb-6 flex flex-wrap items-end justify-between gap-3">
         <div>
-          <p className="text-xs tracking-[0.2em] uppercase text-[var(--gold-400)]">
-            Despacho
-          </p>
           <h1 className="font-display mt-1 text-3xl text-[var(--wine-900)] sm:text-4xl">
             Clientes
           </h1>

@@ -65,9 +65,15 @@ export async function createMatterAction(
     return { error: "Cliente y título del asunto son obligatorios." };
   }
 
-  const radicado = nullStr(formData, "radicado");
-  if (radicado && !/^\d{1,23}$/.test(radicado)) {
-    return { error: "El radicado debe tener hasta 23 dígitos numéricos." };
+  const radicadoRaw = nullStr(formData, "radicado");
+  const radicado =
+    radicadoRaw && /^\d{23}$/.test(radicadoRaw.replace(/\D/g, ""))
+      ? radicadoRaw.replace(/\D/g, "")
+      : radicadoRaw
+        ? null
+        : null;
+  if (radicadoRaw && !radicado) {
+    return { error: "El radicado debe tener exactamente 23 dígitos." };
   }
 
   const responsible =
@@ -144,9 +150,15 @@ export async function updateMatterAction(
   const id = str(formData, "id");
   if (!id) return { error: "Asunto no válido." };
 
-  const radicado = nullStr(formData, "radicado");
-  if (radicado && !/^\d{1,23}$/.test(radicado)) {
-    return { error: "El radicado debe tener hasta 23 dígitos numéricos." };
+  const radicadoRaw = nullStr(formData, "radicado");
+  const radicado =
+    radicadoRaw && /^\d{23}$/.test(radicadoRaw.replace(/\D/g, ""))
+      ? radicadoRaw.replace(/\D/g, "")
+      : radicadoRaw
+        ? null
+        : null;
+  if (radicadoRaw && !radicado) {
+    return { error: "El radicado debe tener exactamente 23 dígitos." };
   }
 
   const status = (str(formData, "status") || "abierto") as MatterStatus;

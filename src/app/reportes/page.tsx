@@ -3,6 +3,7 @@ import { AppShellHost as AppShell } from "@/components/AppShellHost";
 import { EmptyState } from "@/components/EmptyState";
 import { Button } from "@/components/ui/button";
 import { requireMember } from "@/lib/auth";
+import { activityKindLabel } from "@/lib/activity-labels";
 import { formatDate, formatDateTime, todayISO } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
 
@@ -100,9 +101,6 @@ export default async function ReportesPage() {
     <AppShell member={member}>
       <header className="mb-6 flex flex-wrap items-end justify-between gap-4">
         <div>
-          <p className="text-xs tracking-[0.2em] uppercase text-[var(--gold-400)]">
-            Operación
-          </p>
           <h1 className="font-display text-3xl text-[var(--wine-900)] sm:text-4xl">
             Reportes
           </h1>
@@ -255,7 +253,8 @@ export default async function ReportesPage() {
                           {" · "}
                         </>
                       ) : null}
-                      {formatDate(a.created_at)} · {a.entity_type} / {a.action}
+                      {formatDate(a.created_at)} ·{" "}
+                      {activityKindLabel(a.entity_type, a.action)}
                     </p>
                   </li>
                 );
@@ -272,7 +271,7 @@ function Stat({ label, value }: { label: string; value: string }) {
   return (
     <div className="surface rounded-md p-4">
       <p className="hint">{label}</p>
-      <p className="mt-1 font-display text-3xl text-[var(--wine-900)]">
+      <p className="kpi-value mt-1 text-3xl font-semibold text-[var(--wine-900)]">
         {value}
       </p>
     </div>

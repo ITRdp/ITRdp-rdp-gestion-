@@ -131,6 +131,26 @@ h3,
   letter-spacing: -0.02em;
 }
 
+/* Cifras: lining + tabular (evita cifras oldstyle de la display en KPI/tablas) */
+.font-numeric,
+.tabular-nums,
+td.numeric,
+th.numeric,
+.kpi-value,
+.matter-code,
+.money,
+.badge,
+time,
+code {
+  font-family: var(--font-body), "Open Sans", system-ui, sans-serif;
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+.kpi-value {
+  font-family: var(--font-body), "Open Sans", system-ui, sans-serif !important;
+  letter-spacing: 0;
+}
+
 .surface {
   background: var(--surface-elevated);
   border: 1px solid var(--line);

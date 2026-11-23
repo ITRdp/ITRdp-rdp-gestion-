@@ -8,15 +8,22 @@ import {
   setMemberEnabledAction,
   updateMemberRoleAction,
   updateMyNotificationPrefsAction,
+  updateStageDefAction,
   type FormState,
 } from "@/app/actions/admin";
-import type { Member, MemberRole, NonBusinessDay } from "@/lib/types";
+import type {
+  MatterStageDef,
+  Member,
+  MemberRole,
+  NonBusinessDay,
+} from "@/lib/types";
 import { formatDate } from "@/lib/format";
 import {
   DOCUMENT_TYPES,
   EVENT_TYPES,
   MATTER_AREAS,
   MATTER_PRIORITIES,
+  MATTER_PROCEDURE_TYPES,
   MATTER_STAGES,
   MATTER_STATUSES,
   MEMBER_ROLES,
@@ -43,8 +50,8 @@ export function InviteMemberForm() {
     <form action={action} className="surface grid gap-3 rounded-md p-4">
       <h3 className="font-medium text-[var(--ink)]">Invitar / crear miembro</h3>
       <p className="text-xs text-[var(--muted)]">
-        Usa <code>service_role</code> solo en servidor. Crea el usuario en Auth y
-        el perfil en <code>members</code>.
+        Se crea la cuenta y el perfil. En el primer acceso deberá cambiar la
+        contraseña.
       </p>
       <div>
         <Label htmlFor="full_name">Nombre completo</Label>
@@ -71,7 +78,7 @@ export function InviteMemberForm() {
       </div>
       <div>
         <Label htmlFor="temp_password">
-          Contraseña temporal (opcional, mín. 8)
+          Contraseña inicial (opcional, mín. 8)
         </Label>
         <Input
           id="temp_password"
@@ -79,6 +86,9 @@ export function InviteMemberForm() {
           type="password"
           autoComplete="new-password"
         />
+        <p className="hint mt-1">
+          Si la omites, se genera una temporal. El miembro la cambiará al entrar.
+        </p>
       </div>
       {state.error ? (
         <p className="text-sm text-red-700">{state.error}</p>
@@ -135,6 +145,17 @@ export function MembersTable({
                       disabled={pending}
                       onChange={(e) => {
                         const role = e.target.value as MemberRole;
+                        const label =
+                          MEMBER_ROLES.find((r) => r.value === role)?.label ??
+                          role;
+                        if (
+                          !window.confirm(
+                            `¿Cambiar el rol de ${m.full_name} a «${label}»?`,
+                          )
+                        ) {
+                          e.target.value = m.role;
+                          return;
+                        }
                         startTransition(async () => {
                           const res = await updateMemberRoleAction(m.id, role);
                           setMsg(res.error ?? res.success ?? null);
@@ -165,15 +186,22 @@ export function MembersTable({
                       size="sm"
                       variant="secondary"
                       disabled={pending || m.id === currentId}
-                      onClick={() =>
+                      onClick={() => {
+                        const next = !m.enabled;
+                        if (
+                          !window.confirm(
+                            next
+                              ? `¿Habilitar a ${m.full_name}?`
+                              : `¿Deshabilitar a ${m.full_name}? No podrá iniciar sesión.`,
+                          )
+                        ) {
+                          return;
+                        }
                         startTransition(async () => {
-                          const res = await setMemberEnabledAction(
-                            m.id,
-                            !m.enabled,
-                          );
+                          const res = await setMemberEnabledAction(m.id, next);
                           setMsg(res.error ?? res.success ?? null);
-                        })
-                      }
+                        });
+                      }}
                     >
                       {m.enabled ? "Deshabilitar" : "Habilitar"}
                     </Button>
@@ -281,14 +309,100 @@ export function HolidaysAdmin({ days }: { days: NonBusinessDay[] }) {
   );
 }
 
+export function StagesAdmin({ stages }: { stages: MatterStageDef[] }) {
+  const [pending, startTransition] = useTransition();
+  const [msg, setMsg] = useState<string | null>(null);
+  const byType = MATTER_PROCEDURE_TYPES.map((t) => ({
+    ...t,
+    rows: stages.filter((s) => s.matter_type === t.value),
+  }));
+
+  return (
+    <section className="grid gap-4">
+      <div>
+        <h3 className="font-display text-xl text-[var(--wine-900)]">
+          Etapas por tipo de asunto
+        </h3>
+        <p className="mt-1 text-sm text-[var(--muted)]">
+          «Gestiones adicionales» va antes de Cierre y se puede saltar a ella
+          desde cualquier etapa previa en la ficha. «En pausa» es un estado, no
+          una etapa.
+        </p>
+        {msg ? <p className="mt-2 text-sm text-[var(--muted)]">{msg}</p> : null}
+      </div>
+      {!stages.length ? (
+        <EmptyState
+          title="Sin etapas en base de datos"
+          description="Aplica la migración 20261123140000_prelanzamiento_stages.sql."
+        />
+      ) : (
+        <div className="grid gap-4 lg:grid-cols-2">
+          {byType.map((t) => (
+            <div key={t.value} className="surface rounded-md p-4">
+              <h4 className="mb-2 font-medium text-[var(--wine-900)]">
+                {t.label}
+              </h4>
+              <ul className="grid gap-2 text-sm">
+                {t.rows.map((s) => (
+                  <li
+                    key={s.id}
+                    className="flex flex-wrap items-center gap-2 border-b border-[var(--line)] pb-2 last:border-0"
+                  >
+                    <code className="text-xs text-[var(--muted)]">
+                      {s.stage_key}
+                    </code>
+                    <Input
+                      className="h-8 flex-1"
+                      defaultValue={s.label}
+                      disabled={pending}
+                      onBlur={(e) => {
+                        const label = e.target.value.trim();
+                        if (!label || label === s.label) return;
+                        startTransition(async () => {
+                          const res = await updateStageDefAction(s.id, {
+                            label,
+                          });
+                          setMsg(res.error ?? res.success ?? null);
+                        });
+                      }}
+                    />
+                    <label className="flex items-center gap-1 text-xs">
+                      <input
+                        type="checkbox"
+                        defaultChecked={s.enabled}
+                        disabled={pending}
+                        onChange={(e) => {
+                          const enabled = e.target.checked;
+                          startTransition(async () => {
+                            const res = await updateStageDefAction(s.id, {
+                              enabled,
+                            });
+                            setMsg(res.error ?? res.success ?? null);
+                          });
+                        }}
+                      />
+                      Activa
+                    </label>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+      )}
+    </section>
+  );
+}
+
 export function CatalogsReference() {
   const blocks: { title: string; items: { value: string; label: string }[] }[] =
     [
       { title: "Personas", items: [...PERSON_TYPES] },
       { title: "Documentos", items: [...DOCUMENT_TYPES] },
       { title: "Áreas", items: [...MATTER_AREAS] },
+      { title: "Tipos de trámite", items: [...MATTER_PROCEDURE_TYPES] },
       { title: "Estados de asunto", items: [...MATTER_STATUSES] },
-      { title: "Etapas", items: [...MATTER_STAGES] },
+      { title: "Etapas (clave)", items: [...MATTER_STAGES] },
       { title: "Prioridades", items: [...MATTER_PRIORITIES] },
       { title: "Estados de tarea", items: [...TASK_STATUSES] },
       { title: "Tipos de evento", items: [...EVENT_TYPES] },
@@ -297,9 +411,8 @@ export function CatalogsReference() {
   return (
     <div className="grid gap-4 sm:grid-cols-2">
       <p className="sm:col-span-2 text-sm text-[var(--muted)]">
-        Catálogos de dominio definidos en código (
-        <code>src/lib/catalogs.ts</code>). Edición estructural vía deploy; días
-        no hábiles se gestionan en la pestaña Festivos.
+        Referencia de catálogos en código. Las etapas editables están arriba
+        (tabla <code>matter_stage_defs</code>). Días no hábiles: pestaña Festivos.
       </p>
       {blocks.map((b) => (
         <section key={b.title} className="surface rounded-md p-4">
@@ -342,22 +455,7 @@ export function NotificationPrefsForm({ member }: { member: Member }) {
           </span>
         </span>
       </label>
-      <label className="flex items-start gap-3 text-sm">
-        <input
-          type="checkbox"
-          name="email_daily_digest"
-          defaultChecked={Boolean(member.email_daily_digest)}
-          className="mt-1"
-        />
-        <span>
-          <strong>Resumen diario por correo</strong>
-          <br />
-          <span className="text-[var(--muted)]">
-            Preferencia preparada (default off). El envío automático no está
-            activo en esta fase.
-          </span>
-        </span>
-      </label>
+      <input type="hidden" name="email_daily_digest" value="off" />
       {state.error ? (
         <p className="text-sm text-red-700">{state.error}</p>
       ) : null}

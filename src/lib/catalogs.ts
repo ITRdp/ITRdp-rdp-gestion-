@@ -32,54 +32,26 @@ export const MATTER_AREAS = [
   { value: "otro", label: "Otro" },
 ] as const;
 
-/** Tipos de asunto por área (ampliar según práctica del despacho). */
+/** Tipo de trámite / procedimiento (define etapas). */
+export const MATTER_PROCEDURE_TYPES = [
+  { value: "judicial", label: "Judicial" },
+  { value: "arbitral", label: "Arbitral" },
+  { value: "administrativo", label: "Administrativo" },
+  { value: "insolvencia_liquidacion", label: "Insolvencia y liquidación" },
+  { value: "extrajudicial", label: "Extrajudicial / negociación" },
+  { value: "contractual", label: "Contractual" },
+  { value: "consultoria", label: "Consultoría" },
+] as const;
+
+/** @deprecated Usar MATTER_PROCEDURE_TYPES; se mantiene alias para UI legacy. */
 export const MATTER_TYPES_BY_AREA: Record<
   string,
   { value: string; label: string }[]
-> = {
-  responsabilidad_seguros: [
-    { value: "rc_extracontractual", label: "RC extracontractual" },
-    { value: "seguros", label: "Seguros / reclamación" },
-    { value: "productos", label: "Productos defectuosos" },
-    { value: "general", label: "General" },
-  ],
-  empresa: [
-    { value: "contratos", label: "Contratos empresariales" },
-    { value: "laboral_empresa", label: "Laboral empresarial" },
-    { value: "cumplimiento", label: "Cumplimiento / compliance" },
-    { value: "general", label: "General" },
-  ],
-  consumidor: [
-    { value: "proteccion", label: "Protección al consumidor" },
-    { value: "garantias", label: "Garantías" },
-    { value: "publicidad", label: "Publicidad engañosa" },
-    { value: "general", label: "General" },
-  ],
-  insolvencia: [
-    { value: "reorganizacion", label: "Reorganización" },
-    { value: "liquidacion", label: "Liquidación" },
-    { value: "acreedores", label: "Acreedores" },
-    { value: "general", label: "General" },
-  ],
-  comercial: [
-    { value: "mercantil", label: "Mercantil / contratos" },
-    { value: "competencia", label: "Competencia" },
-    { value: "general", label: "General" },
-  ],
-  tributario: [
-    { value: "fiscalizacion", label: "Fiscalización" },
-    { value: "devolucion", label: "Devolución / compensación" },
-    { value: "general", label: "General" },
-  ],
-  societario: [
-    { value: "constitucion", label: "Constitución / reformas" },
-    { value: "gobierno", label: "Gobierno corporativo" },
-    { value: "conflictos", label: "Conflictos societarios" },
-    { value: "general", label: "General" },
-  ],
-  otro: [{ value: "general", label: "General" }],
-};
+> = Object.fromEntries(
+  MATTER_AREAS.map((a) => [a.value, [...MATTER_PROCEDURE_TYPES]]),
+);
 
+/** Etapas globales (fallback; la fuente de verdad es matter_stage_defs). */
 export const MATTER_STAGES = [
   { value: "ingreso", label: "Ingreso" },
   { value: "analisis", label: "Análisis" },
@@ -88,7 +60,15 @@ export const MATTER_STAGES = [
   { value: "alegatos", label: "Alegatos" },
   { value: "fallo", label: "Fallo" },
   { value: "ejecucion", label: "Ejecución" },
+  { value: "gestiones_adicionales", label: "Gestiones adicionales" },
   { value: "cierre", label: "Cierre" },
+] as const;
+
+export const FEE_MODALITIES = [
+  { value: "fijo", label: "Honorarios fijos" },
+  { value: "por_etapa", label: "Por etapa" },
+  { value: "cuota_litis", label: "Cuota litis" },
+  { value: "por_horas", label: "Por horas" },
 ] as const;
 
 export const MATTER_STATUSES = [
