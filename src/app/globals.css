@@ -1,0 +1,240 @@
+@import "tailwindcss";
+
+:root {
+  --wine: #390a10;
+  --wine-deep: #2a070c;
+  --ivory: #fdfcfb;
+  --ivory-muted: #f3efe8;
+  --gold: #775a19;
+  --gold-soft: #a8873a;
+  --ink: #1c1214;
+  --muted: #6b5a55;
+  --line: rgba(57, 10, 16, 0.12);
+  --success: #2f5d3a;
+  --danger: #8b1e2d;
+  --background: var(--ivory);
+  --foreground: var(--ink);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-wine: var(--wine);
+  --color-wine-deep: var(--wine-deep);
+  --color-ivory: var(--ivory);
+  --color-ivory-muted: var(--ivory-muted);
+  --color-gold: var(--gold);
+  --color-gold-soft: var(--gold-soft);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-success: var(--success);
+  --color-danger: var(--danger);
+  --font-sans: var(--font-body);
+  --font-display: var(--font-display);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  color: var(--ink);
+  background:
+    radial-gradient(ellipse 80% 50% at 0% 0%, rgba(119, 90, 25, 0.08), transparent 55%),
+    radial-gradient(ellipse 60% 40% at 100% 10%, rgba(57, 10, 16, 0.06), transparent 50%),
+    linear-gradient(180deg, #fdfcfb 0%, #f7f2eb 100%);
+  font-family: var(--font-body), "Segoe UI", sans-serif;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+h1,
+h2,
+h3,
+.font-display {
+  font-family: var(--font-display), Georgia, serif;
+  letter-spacing: -0.02em;
+}
+
+.surface {
+  background: color-mix(in srgb, var(--ivory) 92%, white);
+  border: 1px solid var(--line);
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border: none;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 600;
+  padding: 0.7rem 1.15rem;
+  transition: transform 160ms ease, background 160ms ease, box-shadow 160ms ease;
+}
+
+.btn:active {
+  transform: translateY(1px);
+}
+
+.btn-primary {
+  background: var(--wine);
+  color: var(--ivory);
+}
+
+.btn-primary:hover {
+  background: var(--wine-deep);
+  box-shadow: 0 8px 24px rgba(57, 10, 16, 0.18);
+}
+
+.btn-secondary {
+  background: transparent;
+  color: var(--wine);
+  border: 1px solid color-mix(in srgb, var(--wine) 35%, transparent);
+}
+
+.btn-secondary:hover {
+  background: color-mix(in srgb, var(--wine) 6%, transparent);
+}
+
+.btn-gold {
+  background: var(--gold);
+  color: var(--ivory);
+}
+
+.btn-gold:hover {
+  background: color-mix(in srgb, var(--gold) 85%, black);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.field label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.field input,
+.field textarea,
+.field select {
+  width: 100%;
+  border: 1px solid var(--line);
+  background: #fff;
+  color: var(--ink);
+  padding: 0.7rem 0.85rem;
+  font: inherit;
+  outline: none;
+  transition: border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.field input:focus,
+.field textarea:focus,
+.field select:focus {
+  border-color: color-mix(in srgb, var(--gold) 70%, var(--wine));
+  box-shadow: 0 0 0 3px rgba(119, 90, 25, 0.12);
+}
+
+.field textarea {
+  min-height: 6rem;
+  resize: vertical;
+}
+
+.hint {
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  padding: 0.2rem 0.55rem;
+  border: 1px solid var(--line);
+  color: var(--wine);
+  background: color-mix(in srgb, var(--ivory) 80%, white);
+}
+
+.badge-gold {
+  border-color: color-mix(in srgb, var(--gold) 40%, transparent);
+  color: var(--gold);
+}
+
+.badge-ok {
+  border-color: color-mix(in srgb, var(--success) 35%, transparent);
+  color: var(--success);
+}
+
+.alert {
+  padding: 0.85rem 1rem;
+  border: 1px solid color-mix(in srgb, var(--danger) 30%, transparent);
+  background: color-mix(in srgb, var(--danger) 8%, white);
+  color: var(--danger);
+  font-size: 0.92rem;
+}
+
+.alert-ok {
+  border-color: color-mix(in srgb, var(--success) 30%, transparent);
+  background: color-mix(in srgb, var(--success) 8%, white);
+  color: var(--success);
+}
+
+.fade-in {
+  animation: fadeIn 420ms ease both;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.rise {
+  animation: rise 560ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.rule {
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, var(--gold) 55%, transparent),
+    transparent
+  );
+  border: 0;
+}
