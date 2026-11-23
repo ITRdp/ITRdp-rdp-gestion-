@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/sheet";
 import { CounterpartsField } from "@/components/CounterpartsField";
 import { CourtSuggest } from "@/components/CourtSuggest";
-import { LocationFields } from "@/components/LocationFields";
+import { useLocationSelection } from "@/components/LocationFields";
 import {
   FEE_MODALITIES,
   MATTER_AREAS,
@@ -55,6 +55,7 @@ export function NewMatterDrawer({
   const [teamIds, setTeamIds] = useState<string[]>([]);
   const [clientMode, setClientMode] = useState<"existing" | "new">("existing");
   const [state, formAction, pending] = useActionState(createMatterAction, initial);
+  const location = useLocationSelection();
 
   const types = useMemo(() => [...MATTER_PROCEDURE_TYPES], []);
   const stages = stagesForType(matterType);
@@ -288,21 +289,21 @@ export function NewMatterDrawer({
               </div>
 
               <CounterpartsField />
-              <div className="field">
-                <Label htmlFor="fee_modality">Modalidad de honorarios</Label>
-                <FormSelect
-                  id="fee_modality"
-                  name="fee_modality"
-                  defaultValue=""
-                  placeholder="Sin definir"
-                  options={FEE_MODALITIES.map((m) => ({
-                    value: m.value,
-                    label: m.label,
-                  }))}
-                />
-              </div>
 
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <div className="field">
+                  <Label htmlFor="fee_modality">Modalidad de honorarios</Label>
+                  <FormSelect
+                    id="fee_modality"
+                    name="fee_modality"
+                    defaultValue=""
+                    placeholder="Sin definir"
+                    options={FEE_MODALITIES.map((m) => ({
+                      value: m.value,
+                      label: m.label,
+                    }))}
+                  />
+                </div>
                 <div className="field">
                   <Label htmlFor="radicado">Radicado (23 dígitos)</Label>
                   <Input
@@ -315,12 +316,46 @@ export function NewMatterDrawer({
                     className="tabular-nums"
                   />
                 </div>
+
                 <CourtSuggest suggestions={courtSuggestions} />
-                <LocationFields cityLabel="Ciudad" persistDepartment={false} />
+                <div className="field">
+                  <Label htmlFor="department-ui">Departamento</Label>
+                  <FormSelect
+                    id="department-ui"
+                    value={location.department}
+                    onValueChange={location.setDepartment}
+                    placeholder="Selecciona…"
+                    options={location.departments.map((d) => ({
+                      value: d,
+                      label: d,
+                    }))}
+                  />
+                </div>
+
+                <div className="field">
+                  <Label htmlFor="city">Ciudad</Label>
+                  <FormSelect
+                    id="city"
+                    name="city"
+                    value={location.city}
+                    onValueChange={location.setCity}
+                    disabled={!location.department}
+                    placeholder={
+                      location.department
+                        ? "Selecciona…"
+                        : "Elige departamento primero"
+                    }
+                    options={location.cityOptions}
+                  />
+                </div>
                 <div className="field">
                   <Label htmlFor="procedural_deadline">Venc. procesal</Label>
-                  <DatePicker id="procedural_deadline" name="procedural_deadline" />
+                  <DatePicker
+                    id="procedural_deadline"
+                    name="procedural_deadline"
+                  />
                 </div>
+
                 <div className="field">
                   <Label htmlFor="amount_cop">Cuantía (COP)</Label>
                   <Input id="amount_cop" name="amount_cop" placeholder="0" />
@@ -329,7 +364,8 @@ export function NewMatterDrawer({
                   <Label htmlFor="fees_cop">Honorarios (COP)</Label>
                   <Input id="fees_cop" name="fees_cop" placeholder="0" />
                 </div>
-                <div className="field sm:col-span-2">
+
+                <div className="field">
                   <Label htmlFor="opened_at">Fecha de apertura</Label>
                   <DatePicker
                     id="opened_at"
@@ -337,6 +373,8 @@ export function NewMatterDrawer({
                     defaultValue={new Date().toISOString().slice(0, 10)}
                   />
                 </div>
+                {/* Celda pareja vacía para mantener la grilla 2-col */}
+                <div className="hidden sm:block" aria-hidden />
               </div>
 
               <div className="field">

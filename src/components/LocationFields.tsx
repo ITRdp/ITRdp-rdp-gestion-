@@ -5,6 +5,39 @@ import { Label } from "@/components/ui/label";
 import { FormSelect } from "@/components/ui/select";
 import { daneDepartments, daneMunicipalities } from "@/lib/dane";
 
+export function useLocationSelection({
+  departmentDefault,
+  cityDefault,
+}: {
+  departmentDefault?: string | null;
+  cityDefault?: string | null;
+} = {}) {
+  const departments = useMemo(() => daneDepartments(), []);
+  const [department, setDepartment] = useState(departmentDefault ?? "");
+  const [city, setCity] = useState(cityDefault ?? "");
+  const municipalities = daneMunicipalities(department);
+
+  const cityOptions = useMemo(() => {
+    const opts = municipalities.map((m) => ({ value: m, label: m }));
+    if (city && !municipalities.includes(city)) {
+      opts.push({ value: city, label: `${city} (actual)` });
+    }
+    return opts;
+  }, [municipalities, city]);
+
+  return {
+    department,
+    setDepartment: (v: string) => {
+      setDepartment(v);
+      setCity("");
+    },
+    city,
+    setCity,
+    departments,
+    cityOptions,
+  };
+}
+
 export function LocationFields({
   departmentDefault,
   cityDefault,
@@ -21,18 +54,7 @@ export function LocationFields({
   /** Si false, el departamento solo filtra municipios (no se envía en el form). */
   persistDepartment?: boolean;
 }) {
-  const departments = useMemo(() => daneDepartments(), []);
-  const [department, setDepartment] = useState(departmentDefault ?? "");
-  const [city, setCity] = useState(cityDefault ?? "");
-  const municipalities = daneMunicipalities(department);
-
-  const cityOptions = useMemo(() => {
-    const opts = municipalities.map((m) => ({ value: m, label: m }));
-    if (city && !municipalities.includes(city)) {
-      opts.push({ value: city, label: `${city} (actual)` });
-    }
-    return opts;
-  }, [municipalities, city]);
+  const loc = useLocationSelection({ departmentDefault, cityDefault });
 
   return (
     <>
@@ -41,13 +63,10 @@ export function LocationFields({
         <FormSelect
           id={`${departmentName}-ui`}
           name={persistDepartment ? departmentName : undefined}
-          value={department}
-          onValueChange={(v) => {
-            setDepartment(v);
-            setCity("");
-          }}
+          value={loc.department}
+          onValueChange={loc.setDepartment}
           placeholder="Selecciona…"
-          options={departments.map((d) => ({ value: d, label: d }))}
+          options={loc.departments.map((d) => ({ value: d, label: d }))}
         />
       </div>
       <div className="field">
@@ -55,13 +74,13 @@ export function LocationFields({
         <FormSelect
           id={cityName}
           name={cityName}
-          value={city}
-          onValueChange={setCity}
-          disabled={!department}
+          value={loc.city}
+          onValueChange={loc.setCity}
+          disabled={!loc.department}
           placeholder={
-            department ? "Selecciona…" : "Elige departamento primero"
+            loc.department ? "Selecciona…" : "Elige departamento primero"
           }
-          options={cityOptions}
+          options={loc.cityOptions}
         />
       </div>
     </>
