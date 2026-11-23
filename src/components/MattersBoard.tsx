@@ -6,6 +6,7 @@ import { useTransition } from "react";
 import { updateMatterStageStatusAction } from "@/app/actions/matters";
 import { EmptyState } from "@/components/EmptyState";
 import { Button } from "@/components/ui/button";
+import { FormSelect } from "@/components/ui/select";
 import {
   MATTER_AREAS,
   MATTER_PRIORITIES,
@@ -184,13 +185,16 @@ export function MattersBoard({ matters }: { matters: MatterRow[] }) {
                           {m.priority}
                         </span>
                       </div>
-                      <select
-                        className="mt-2 w-full rounded border border-[var(--line)] bg-white px-2 py-1 text-xs"
+                      <FormSelect
+                        triggerClassName="mt-2 h-8 text-xs"
                         disabled={pending}
-                        defaultValue=""
-                        onChange={(e) => {
-                          const next = e.target.value as MatterStage;
-                          e.target.value = "";
+                        value=""
+                        placeholder="Cambiar etapa…"
+                        options={stagesForType(m.matter_type)
+                          .filter((s) => s.value !== m.stage)
+                          .map((s) => ({ value: s.value, label: s.label }))}
+                        onValueChange={(nextRaw) => {
+                          const next = nextRaw as MatterStage;
                           if (!next || next === m.stage) return;
                           const typeStages = stagesForType(m.matter_type);
                           const label = labelOf(typeStages, next);
@@ -208,16 +212,7 @@ export function MattersBoard({ matters }: { matters: MatterRow[] }) {
                             router.refresh();
                           });
                         }}
-                      >
-                        <option value="">Cambiar etapa…</option>
-                        {stagesForType(m.matter_type)
-                          .filter((s) => s.value !== m.stage)
-                          .map((s) => (
-                            <option key={s.value} value={s.value}>
-                              {s.label}
-                            </option>
-                          ))}
-                      </select>
+                      />
                     </li>
                   ))}
                 </ul>
@@ -345,18 +340,13 @@ function FilterSelect({
   return (
     <label className="grid gap-1 text-xs text-[var(--muted)]">
       {label}
-      <select
-        className="h-9 rounded-md border border-[var(--line)] bg-white px-2 text-sm text-[var(--ink)]"
+      <FormSelect
         value={value}
-        onChange={(e) => onChange(e.target.value)}
-      >
-        <option value="">Todos</option>
-        {options.map((o) => (
-          <option key={o.value} value={o.value}>
-            {o.label}
-          </option>
-        ))}
-      </select>
+        onValueChange={onChange}
+        placeholder="Todos"
+        triggerClassName="h-9"
+        options={options}
+      />
     </label>
   );
 }

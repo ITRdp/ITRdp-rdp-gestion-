@@ -8,21 +8,21 @@ import { cn } from "@/lib/utils";
 const Select = SelectPrimitive.Root;
 const SelectValue = SelectPrimitive.Value;
 
+const SELECT_TRIGGER_CLASS =
+  "flex h-10 w-full items-center justify-between gap-2 rounded-md border border-[var(--line)] bg-white px-3 py-2 text-sm leading-normal text-[var(--ink)] outline-none focus:ring-2 focus:ring-[var(--wine-700)]/20 disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1 [&>span]:min-w-0 [&>span]:flex-1 [&>span]:text-left";
+
 const SelectTrigger = React.forwardRef<
   React.ElementRef<typeof SelectPrimitive.Trigger>,
   React.ComponentPropsWithoutRef<typeof SelectPrimitive.Trigger>
 >(({ className, children, ...props }, ref) => (
   <SelectPrimitive.Trigger
     ref={ref}
-    className={cn(
-      "flex h-10 w-full items-center justify-between rounded-md border border-[var(--line)] bg-white px-3 text-sm text-[var(--ink)] outline-none focus:ring-2 focus:ring-[var(--wine-700)]/20 disabled:cursor-not-allowed disabled:opacity-50",
-      className,
-    )}
+    className={cn(SELECT_TRIGGER_CLASS, className)}
     {...props}
   >
     {children}
     <SelectPrimitive.Icon asChild>
-      <ChevronDown className="h-4 w-4 opacity-50" />
+      <ChevronDown className="h-4 w-4 shrink-0 opacity-50" />
     </SelectPrimitive.Icon>
   </SelectPrimitive.Trigger>
 ));
@@ -37,13 +37,22 @@ const SelectContent = React.forwardRef<
       ref={ref}
       className={cn(
         "z-50 max-h-72 min-w-[8rem] overflow-hidden rounded-md border border-[var(--line)] bg-white text-[var(--ink)] shadow-md",
-        position === "popper" && "data-[side=bottom]:translate-y-1",
+        position === "popper" &&
+          "data-[side=bottom]:translate-y-1 data-[side=top]:-translate-y-1",
         className,
       )}
       position={position}
       {...props}
     >
-      <SelectPrimitive.Viewport className="p-1">{children}</SelectPrimitive.Viewport>
+      <SelectPrimitive.Viewport
+        className={cn(
+          "p-1",
+          position === "popper" &&
+            "h-[var(--radix-select-trigger-height)] w-full min-w-[var(--radix-select-trigger-width)]",
+        )}
+      >
+        {children}
+      </SelectPrimitive.Viewport>
     </SelectPrimitive.Content>
   </SelectPrimitive.Portal>
 ));
@@ -56,7 +65,7 @@ const SelectItem = React.forwardRef<
   <SelectPrimitive.Item
     ref={ref}
     className={cn(
-      "relative flex w-full cursor-pointer select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none focus:bg-[var(--wine-50)] data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+      "relative flex w-full cursor-pointer select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm leading-normal outline-none focus:bg-[var(--wine-50)] data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
       className,
     )}
     {...props}
@@ -71,7 +80,94 @@ const SelectItem = React.forwardRef<
 ));
 SelectItem.displayName = SelectPrimitive.Item.displayName;
 
-/** Select nativo tematizado para formularios server-friendly (name + FormData). */
+export type FormSelectOption = {
+  value: string;
+  label: string;
+  disabled?: boolean;
+};
+
+const EMPTY = "__empty__";
+
+/** Select shadcn (Radix) con `name` oculto para FormData. */
+export function FormSelect({
+  id,
+  name,
+  options,
+  value,
+  defaultValue,
+  onValueChange,
+  placeholder = "Selecciona…",
+  required,
+  disabled,
+  className,
+  triggerClassName,
+}: {
+  id?: string;
+  name?: string;
+  options: FormSelectOption[];
+  value?: string;
+  defaultValue?: string;
+  onValueChange?: (value: string) => void;
+  placeholder?: string;
+  required?: boolean;
+  disabled?: boolean;
+  className?: string;
+  triggerClassName?: string;
+}) {
+  const [uncontrolled, setUncontrolled] = React.useState(
+    () => defaultValue ?? "",
+  );
+  const current = value !== undefined ? value : uncontrolled;
+  const radixValue = current === "" ? EMPTY : current;
+
+  const items = React.useMemo(() => {
+    const hasEmpty = options.some((o) => o.value === "");
+    const mapped = options.map((o) =>
+      o.value === "" ? { ...o, value: EMPTY } : o,
+    );
+    if (!hasEmpty && (placeholder || !required)) {
+      return [{ value: EMPTY, label: placeholder, disabled: required }, ...mapped];
+    }
+    return mapped;
+  }, [options, placeholder, required]);
+
+  function handleChange(next: string) {
+    const real = next === EMPTY ? "" : next;
+    if (value === undefined) setUncontrolled(real);
+    onValueChange?.(real);
+  }
+
+  return (
+    <div className={cn("w-full min-w-0", className)}>
+      {name ? (
+        <input type="hidden" name={name} value={current} required={required} />
+      ) : null}
+      <Select
+        value={radixValue}
+        onValueChange={handleChange}
+        disabled={disabled}
+        required={required}
+      >
+        <SelectTrigger id={id} className={triggerClassName}>
+          <SelectValue placeholder={placeholder} />
+        </SelectTrigger>
+        <SelectContent>
+          {items.map((o) => (
+            <SelectItem
+              key={o.value}
+              value={o.value}
+              disabled={o.disabled}
+            >
+              {o.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
+  );
+}
+
+/** @deprecated Prefer FormSelect; se mantiene para wrappers puntuales. */
 export function NativeSelect({
   className,
   ...props
@@ -79,7 +175,7 @@ export function NativeSelect({
   return (
     <select
       className={cn(
-        "flex h-10 w-full rounded-md border border-[var(--line)] bg-white px-3 text-sm text-[var(--ink)] outline-none focus:ring-2 focus:ring-[var(--wine-700)]/20 disabled:opacity-50",
+        "flex h-10 w-full appearance-none rounded-md border border-[var(--line)] bg-white px-3 py-2 text-sm leading-normal text-[var(--ink)] outline-none focus:ring-2 focus:ring-[var(--wine-700)]/20 disabled:opacity-50",
         className,
       )}
       {...props}

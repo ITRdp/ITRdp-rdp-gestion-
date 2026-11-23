@@ -10,6 +10,7 @@ import {
 } from "@/app/actions/tasks";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { FormSelect } from "@/components/ui/select";
 import { TASK_STATUSES, labelOf } from "@/lib/catalogs";
 import type { ChecklistItem, TaskComment, TaskStatus } from "@/lib/types";
 import { formatDateTime } from "@/lib/format";
@@ -27,28 +28,26 @@ export function TaskStatusSelect({
 }) {
   const [pending, start] = useTransition();
   return (
-    <select
-      className="rounded border border-[var(--line)] bg-white px-2 py-1 text-xs capitalize"
-      disabled={pending}
+    <FormSelect
       value={status}
-      onChange={(e) =>
+      disabled={pending}
+      triggerClassName="h-8 text-xs capitalize"
+      options={TASK_STATUSES.map((s) => ({
+        value: s.value,
+        label: s.label,
+      }))}
+      onValueChange={(v) =>
         start(async () => {
           const res = await updateTaskStatusAction(
             taskId,
             matterId,
-            e.target.value as TaskStatus,
+            v as TaskStatus,
           );
           if (res.error) toast.error(res.error);
           else toast.success("Estado actualizado");
         })
       }
-    >
-      {TASK_STATUSES.map((s) => (
-        <option key={s.value} value={s.value}>
-          {s.label}
-        </option>
-      ))}
-    </select>
+    />
   );
 }
 

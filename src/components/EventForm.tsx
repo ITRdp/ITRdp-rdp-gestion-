@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { DateTimePicker } from "@/components/ui/date-picker";
-import { NativeSelect } from "@/components/ui/select";
+import { FormSelect } from "@/components/ui/select";
 import { EVENT_TYPES } from "@/lib/catalogs";
 
 const initial: FormState = {};
@@ -43,28 +43,28 @@ export function EventForm({
       <div className="grid gap-3 sm:grid-cols-2">
         <div className="field">
           <Label htmlFor="event_type">Tipo</Label>
-          <NativeSelect id="event_type" name="event_type" defaultValue="audiencia">
-            {EVENT_TYPES.map((t) => (
-              <option key={t.value} value={t.value}>
-                {t.label}
-              </option>
-            ))}
-          </NativeSelect>
+          <FormSelect
+            id="event_type"
+            name="event_type"
+            defaultValue="audiencia"
+            options={EVENT_TYPES.map((t) => ({
+              value: t.value,
+              label: t.label,
+            }))}
+          />
         </div>
         <div className="field">
           <Label htmlFor="matter_id">Asunto (opcional)</Label>
-          <NativeSelect
+          <FormSelect
             id="matter_id"
             name="matter_id"
             defaultValue={defaultMatterId ?? ""}
-          >
-            <option value="">Sin vincular</option>
-            {matters.map((m) => (
-              <option key={m.id} value={m.id}>
-                {m.code} · {m.title}
-              </option>
-            ))}
-          </NativeSelect>
+            placeholder="Sin vincular"
+            options={matters.map((m) => ({
+              value: m.id,
+              label: `${m.code} · ${m.title}`,
+            }))}
+          />
         </div>
         <div className="field">
           <Label htmlFor="starts_at">Inicio</Label>

@@ -13,7 +13,7 @@ export function DatePicker({
     <Input
       type="date"
       lang="es-CO"
-      className={cn("tabular-nums", className)}
+      className={cn("h-10 leading-normal tabular-nums", className)}
       {...props}
     />
   );
@@ -27,7 +27,7 @@ export function DateTimePicker({
     <Input
       type="datetime-local"
       lang="es-CO"
-      className={cn("tabular-nums", className)}
+      className={cn("h-10 leading-normal tabular-nums", className)}
       {...props}
     />
   );

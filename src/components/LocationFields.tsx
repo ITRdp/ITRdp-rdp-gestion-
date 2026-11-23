@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { Label } from "@/components/ui/label";
-import { NativeSelect } from "@/components/ui/select";
+import { FormSelect } from "@/components/ui/select";
 import { daneDepartments, daneMunicipalities } from "@/lib/dane";
 
 export function LocationFields({
@@ -26,48 +26,43 @@ export function LocationFields({
   const [city, setCity] = useState(cityDefault ?? "");
   const municipalities = daneMunicipalities(department);
 
+  const cityOptions = useMemo(() => {
+    const opts = municipalities.map((m) => ({ value: m, label: m }));
+    if (city && !municipalities.includes(city)) {
+      opts.push({ value: city, label: `${city} (actual)` });
+    }
+    return opts;
+  }, [municipalities, city]);
+
   return (
     <>
       <div className="field">
         <Label htmlFor={`${departmentName}-ui`}>Departamento</Label>
-        <NativeSelect
+        <FormSelect
           id={`${departmentName}-ui`}
           name={persistDepartment ? departmentName : undefined}
           value={department}
-          onChange={(e) => {
-            setDepartment(e.target.value);
+          onValueChange={(v) => {
+            setDepartment(v);
             setCity("");
           }}
-        >
-          <option value="">Selecciona…</option>
-          {departments.map((d) => (
-            <option key={d} value={d}>
-              {d}
-            </option>
-          ))}
-        </NativeSelect>
+          placeholder="Selecciona…"
+          options={departments.map((d) => ({ value: d, label: d }))}
+        />
       </div>
       <div className="field">
         <Label htmlFor={cityName}>{cityLabel}</Label>
-        <NativeSelect
+        <FormSelect
           id={cityName}
           name={cityName}
           value={city}
-          onChange={(e) => setCity(e.target.value)}
+          onValueChange={setCity}
           disabled={!department}
-        >
-          <option value="">
-            {department ? "Selecciona…" : "Elige departamento primero"}
-          </option>
-          {municipalities.map((m) => (
-            <option key={m} value={m}>
-              {m}
-            </option>
-          ))}
-          {city && !municipalities.includes(city) ? (
-            <option value={city}>{city} (actual)</option>
-          ) : null}
-        </NativeSelect>
+          placeholder={
+            department ? "Selecciona…" : "Elige departamento primero"
+          }
+          options={cityOptions}
+        />
       </div>
     </>
   );

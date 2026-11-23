@@ -36,7 +36,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { DatePicker } from "@/components/ui/date-picker";
-import { NativeSelect } from "@/components/ui/select";
+import { FormSelect } from "@/components/ui/select";
 import { EmptyState } from "@/components/EmptyState";
 import { GripVertical } from "lucide-react";
 
@@ -67,20 +67,17 @@ export function InviteMemberForm() {
         <Label htmlFor="email">Correo</Label>
         <Input id="email" name="email" type="email" required />
       </div>
-      <div>
+      <div className="field">
         <Label htmlFor="role">Rol</Label>
-        <select
+        <FormSelect
           id="role"
           name="role"
           defaultValue="abogado"
-          className="flex h-10 w-full rounded-md border border-[var(--line)] bg-white px-3 text-sm"
-        >
-          {MEMBER_ROLES.map((r) => (
-            <option key={r.value} value={r.value}>
-              {r.label}
-            </option>
-          ))}
-        </select>
+          options={MEMBER_ROLES.map((r) => ({
+            value: r.value,
+            label: r.label,
+          }))}
+        />
       </div>
       <div>
         <Label htmlFor="temp_password">
@@ -109,6 +106,78 @@ export function InviteMemberForm() {
   );
 }
 
+function MemberRoleControl({
+  member,
+  pending,
+  onRole,
+}: {
+  member: Member;
+  pending: boolean;
+  onRole: (role: MemberRole) => void;
+}) {
+  return (
+    <FormSelect
+      value={member.role}
+      disabled={pending}
+      triggerClassName="h-9"
+      options={MEMBER_ROLES.map((r) => ({
+        value: r.value,
+        label: r.label,
+      }))}
+      onValueChange={(v) => {
+        const role = v as MemberRole;
+        if (role === member.role) return;
+        const label =
+          MEMBER_ROLES.find((r) => r.value === role)?.label ?? role;
+        if (
+          !window.confirm(
+            `¿Cambiar el rol de ${member.full_name} a «${label}»?`,
+          )
+        ) {
+          return;
+        }
+        onRole(role);
+      }}
+    />
+  );
+}
+
+function MemberEnableButton({
+  member,
+  currentId,
+  pending,
+  onToggle,
+}: {
+  member: Member;
+  currentId: string;
+  pending: boolean;
+  onToggle: (next: boolean) => void;
+}) {
+  return (
+    <Button
+      type="button"
+      size="sm"
+      variant="secondary"
+      disabled={pending || member.id === currentId}
+      onClick={() => {
+        const next = !member.enabled;
+        if (
+          !window.confirm(
+            next
+              ? `¿Habilitar a ${member.full_name}?`
+              : `¿Deshabilitar a ${member.full_name}? No podrá iniciar sesión.`,
+          )
+        ) {
+          return;
+        }
+        onToggle(next);
+      }}
+    >
+      {member.enabled ? "Deshabilitar" : "Habilitar"}
+    </Button>
+  );
+}
+
 export function MembersTable({
   members,
   currentId,
@@ -118,6 +187,20 @@ export function MembersTable({
 }) {
   const [pending, startTransition] = useTransition();
   const [msg, setMsg] = useState<string | null>(null);
+
+  function changeRole(id: string, role: MemberRole) {
+    startTransition(async () => {
+      const res = await updateMemberRoleAction(id, role);
+      setMsg(res.error ?? res.success ?? null);
+    });
+  }
+
+  function changeEnabled(id: string, next: boolean) {
+    startTransition(async () => {
+      const res = await setMemberEnabledAction(id, next);
+      setMsg(res.error ?? res.success ?? null);
+    });
+  }
 
   return (
     <section>
@@ -129,108 +212,89 @@ export function MembersTable({
         <EmptyState title="Sin miembros." />
       ) : (
         <>
-        <ul className="mb-4 grid gap-3 md:hidden">
-          {members.map((m) => (
-            <li key={`card-${m.id}`} className="surface rounded-md p-3 text-sm">
-              <p className="font-medium">{m.full_name}</p>
-              <p className="text-[var(--muted)]">{m.email}</p>
-              <p className="mt-1 text-xs capitalize text-[var(--muted)]">
-                {m.role} · {m.enabled ? "Activo" : "Deshabilitado"}
-              </p>
-            </li>
-          ))}
-        </ul>
-        <div className="hidden overflow-x-auto rounded-md border border-[var(--line)] md:block">
-          <table className="w-full min-w-[36rem] text-left text-sm">
-            <thead className="bg-[var(--surface)] text-xs uppercase tracking-wide text-[var(--muted)]">
-              <tr>
-                <th className="px-3 py-2">Nombre</th>
-                <th className="px-3 py-2">Correo</th>
-                <th className="px-3 py-2">Rol</th>
-                <th className="px-3 py-2">Estado</th>
-                <th className="sticky right-0 bg-[var(--surface)] px-3 py-2">
-                  Acciones
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {members.map((m) => (
-                <tr key={m.id} className="border-t border-[var(--line)]">
-                  <td className="px-3 py-2 font-medium">{m.full_name}</td>
-                  <td className="px-3 py-2 text-[var(--muted)]">{m.email}</td>
-                  <td className="px-3 py-2">
-                    <select
-                      className="h-8 rounded-md border border-[var(--line)] bg-white px-2 text-sm"
-                      defaultValue={m.role}
-                      disabled={pending}
-                      onChange={(e) => {
-                        const role = e.target.value as MemberRole;
-                        const label =
-                          MEMBER_ROLES.find((r) => r.value === role)?.label ??
-                          role;
-                        if (
-                          !window.confirm(
-                            `¿Cambiar el rol de ${m.full_name} a «${label}»?`,
-                          )
-                        ) {
-                          e.target.value = m.role;
-                          return;
-                        }
-                        startTransition(async () => {
-                          const res = await updateMemberRoleAction(m.id, role);
-                          setMsg(res.error ?? res.success ?? null);
-                        });
-                      }}
-                    >
-                      {MEMBER_ROLES.map((r) => (
-                        <option key={r.value} value={r.value}>
-                          {r.label}
-                        </option>
-                      ))}
-                    </select>
-                  </td>
-                  <td className="px-3 py-2">
-                    <span
-                      className={
-                        m.enabled
-                          ? "text-emerald-700"
-                          : "text-[var(--muted)]"
-                      }
-                    >
-                      {m.enabled ? "Habilitado" : "Deshabilitado"}
-                    </span>
-                  </td>
-                  <td className="px-3 py-2">
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant="secondary"
-                      disabled={pending || m.id === currentId}
-                      onClick={() => {
-                        const next = !m.enabled;
-                        if (
-                          !window.confirm(
-                            next
-                              ? `¿Habilitar a ${m.full_name}?`
-                              : `¿Deshabilitar a ${m.full_name}? No podrá iniciar sesión.`,
-                          )
-                        ) {
-                          return;
-                        }
-                        startTransition(async () => {
-                          const res = await setMemberEnabledAction(m.id, next);
-                          setMsg(res.error ?? res.success ?? null);
-                        });
-                      }}
-                    >
-                      {m.enabled ? "Deshabilitar" : "Habilitar"}
-                    </Button>
-                  </td>
+          {/* <1280px: tarjetas con acciones (sin scroll horizontal) */}
+          <ul className="grid gap-3 xl:hidden">
+            {members.map((m) => (
+              <li
+                key={`card-${m.id}`}
+                className="surface grid gap-3 rounded-md p-3 text-sm"
+              >
+                <div className="min-w-0">
+                  <p className="truncate font-medium">{m.full_name}</p>
+                  <p className="truncate text-[var(--muted)]">{m.email}</p>
+                  <p
+                    className={
+                      m.enabled
+                        ? "mt-1 text-xs text-emerald-700"
+                        : "mt-1 text-xs text-[var(--muted)]"
+                    }
+                  >
+                    {m.enabled ? "Habilitado" : "Deshabilitado"}
+                  </p>
+                </div>
+                <div className="grid gap-2 sm:grid-cols-[1fr_auto] sm:items-center">
+                  <MemberRoleControl
+                    member={m}
+                    pending={pending}
+                    onRole={(role) => changeRole(m.id, role)}
+                  />
+                  <MemberEnableButton
+                    member={m}
+                    currentId={currentId}
+                    pending={pending}
+                    onToggle={(next) => changeEnabled(m.id, next)}
+                  />
+                </div>
+              </li>
+            ))}
+          </ul>
+          <div className="hidden overflow-hidden rounded-md border border-[var(--line)] xl:block">
+            <table className="w-full text-left text-sm">
+              <thead className="bg-[var(--surface)] text-xs uppercase tracking-wide text-[var(--muted)]">
+                <tr>
+                  <th className="px-3 py-2">Nombre</th>
+                  <th className="px-3 py-2">Correo</th>
+                  <th className="px-3 py-2">Rol</th>
+                  <th className="px-3 py-2">Estado</th>
+                  <th className="px-3 py-2">Acciones</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {members.map((m) => (
+                  <tr key={m.id} className="border-t border-[var(--line)]">
+                    <td className="px-3 py-2 font-medium">{m.full_name}</td>
+                    <td className="px-3 py-2 text-[var(--muted)]">{m.email}</td>
+                    <td className="px-3 py-2">
+                      <MemberRoleControl
+                        member={m}
+                        pending={pending}
+                        onRole={(role) => changeRole(m.id, role)}
+                      />
+                    </td>
+                    <td className="px-3 py-2">
+                      <span
+                        className={
+                          m.enabled
+                            ? "text-emerald-700"
+                            : "text-[var(--muted)]"
+                        }
+                      >
+                        {m.enabled ? "Habilitado" : "Deshabilitado"}
+                      </span>
+                    </td>
+                    <td className="px-3 py-2">
+                      <MemberEnableButton
+                        member={m}
+                        currentId={currentId}
+                        pending={pending}
+                        onToggle={(next) => changeEnabled(m.id, next)}
+                      />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </>
       )}
     </section>
@@ -260,19 +324,14 @@ export function HolidaysAdmin({ days }: { days: NonBusinessDay[] }) {
             Opcional. Si la indicas, se registran todos los días del rango.
           </p>
         </div>
-        <div>
+        <div className="field">
           <Label htmlFor="kind">Tipo</Label>
-          <NativeSelect
+          <FormSelect
             id="kind"
             name="kind"
             defaultValue="festivo_nacional"
-          >
-            {HOLIDAY_KINDS.map((k) => (
-              <option key={k.value} value={k.value}>
-                {k.label}
-              </option>
-            ))}
-          </NativeSelect>
+            options={HOLIDAY_KINDS}
+          />
         </div>
         <div>
           <Label htmlFor="name">Nombre</Label>
@@ -418,18 +477,16 @@ export function StagesAdmin({ stages }: { stages: MatterStageDef[] }) {
       >
         <div className="field">
           <Label htmlFor="add_matter_type">Tipo</Label>
-          <NativeSelect
+          <FormSelect
             id="add_matter_type"
             name="matter_type"
             defaultValue="judicial"
             required
-          >
-            {MATTER_PROCEDURE_TYPES.map((t) => (
-              <option key={t.value} value={t.value}>
-                {t.label}
-              </option>
-            ))}
-          </NativeSelect>
+            options={MATTER_PROCEDURE_TYPES.map((t) => ({
+              value: t.value,
+              label: t.label,
+            }))}
+          />
         </div>
         <div className="field">
           <Label htmlFor="add_label">Nueva etapa</Label>
