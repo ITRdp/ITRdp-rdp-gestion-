@@ -1,8 +1,19 @@
 import { MATTER_STAGES, MATTER_STATUSES, stagesForType } from "@/lib/catalogs";
 
-const STAGE_LABELS = new Map<string, string>(
-  MATTER_STAGES.map((s) => [s.value, s.label]),
-);
+const STAGE_LABELS = new Map<string, string>([
+  ...MATTER_STAGES.map((s) => [s.value, s.label] as [string, string]),
+  // Claves legacy / deshabilitadas que aún pueden aparecer en activity_log
+  ["ingreso", "Ingreso"],
+  ["demanda", "Demanda"],
+  ["contestacion", "Contestación"],
+  ["actuacion", "Actuación"],
+  ["audiencia", "Audiencia"],
+  ["fallo", "Fallo"],
+  ["peticion", "Petición"],
+  ["entrega", "Entrega"],
+  ["redaccion", "Redacción"],
+  ["revision", "Revisión"],
+]);
 const STATUS_LABELS = new Map<string, string>(
   MATTER_STATUSES.map((s) => [s.value, s.label]),
 );
