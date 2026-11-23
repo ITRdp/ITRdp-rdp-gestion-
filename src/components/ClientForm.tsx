@@ -10,6 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { LocationFields } from "@/components/LocationFields";
 import { DOCUMENT_TYPES, PERSON_TYPES } from "@/lib/catalogs";
 import { nitCheckDigit } from "@/lib/nit";
 import type { Client } from "@/lib/types";
@@ -74,14 +75,15 @@ export function ClientForm({
             defaultValue={client?.name ?? ""}
             placeholder="Constructora Ejemplo S.A.S."
           />
+          <input type="hidden" name="legal_name" value={client?.legal_name ?? ""} />
         </div>
-        <div className="field sm:col-span-2">
-          <Label htmlFor="legal_name">Razón social / nombre completo</Label>
+        <div className="field">
+          <Label htmlFor="trade_name">Nombre comercial (opcional)</Label>
           <Input
-            id="legal_name"
-            name="legal_name"
-            defaultValue={client?.legal_name ?? ""}
-            placeholder="Opcional si coincide con el nombre"
+            id="trade_name"
+            name="trade_name"
+            defaultValue={client?.trade_name ?? ""}
+            placeholder="Marca o nombre comercial"
           />
         </div>
         <div className="field">
@@ -125,18 +127,10 @@ export function ClientForm({
             <input type="hidden" name="document_dv" value="" />
           )}
         </div>
-        <div className="field">
-          <Label htmlFor="city">Ciudad</Label>
-          <Input id="city" name="city" defaultValue={client?.city ?? ""} />
-        </div>
-        <div className="field">
-          <Label htmlFor="department">Departamento</Label>
-          <Input
-            id="department"
-            name="department"
-            defaultValue={client?.department ?? ""}
-          />
-        </div>
+        <LocationFields
+          departmentDefault={client?.department}
+          cityDefault={client?.city}
+        />
         <div className="field sm:col-span-2">
           <Label htmlFor="address">Dirección</Label>
           <Input

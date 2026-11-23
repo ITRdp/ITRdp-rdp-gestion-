@@ -126,7 +126,17 @@ export function AgendaViews({
           holidayMap={holidayMap}
         />
       ) : (
-        <MesView events={events} anchor={anchor} holidayMap={holidayMap} />
+        <MesView
+          events={events}
+          anchor={anchor}
+          holidayMap={holidayMap}
+          onDayCreate={(iso) => {
+            const next = new URLSearchParams(params.toString());
+            next.set("fecha", iso);
+            next.set("nuevo", "1");
+            router.push(`/agenda?${next.toString()}`);
+          }}
+        />
       )}
     </div>
   );
@@ -181,10 +191,12 @@ function MesView({
   events,
   anchor,
   holidayMap,
+  onDayCreate,
 }: {
   events: AgendaEventRow[];
   anchor: string;
   holidayMap: Map<string, string>;
+  onDayCreate: (iso: string) => void;
 }) {
   const first = startOfMonth(anchor);
   const startPad = (first.getDay() + 6) % 7; // Monday=0
@@ -217,11 +229,21 @@ function MesView({
               <div className="flex items-center justify-between text-xs">
                 <span className="font-medium">{d.getDate()}</span>
                 {holiday ? (
-                  <span className="truncate text-[10px] text-[var(--wine-700)]">
+                  <span
+                    className="truncate text-[10px] text-[var(--wine-700)]"
+                    title={holiday}
+                  >
                     {holiday}
                   </span>
                 ) : null}
               </div>
+              <button
+                type="button"
+                className="mb-1 block w-full text-left text-[10px] text-[var(--wine-700)] underline-offset-2 hover:underline"
+                onClick={() => onDayCreate(iso)}
+              >
+                + Evento
+              </button>
               {dayEvents.slice(0, 3).map((e) => (
                 <span
                   key={e.id}

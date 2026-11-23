@@ -6,7 +6,9 @@ import { updateMatterAction, type FormState } from "@/app/actions/matters";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { CounterpartsField } from "@/components/CounterpartsField";
 import {
+  FEE_MODALITIES,
   MATTER_AREAS,
   MATTER_PRIORITIES,
   MATTER_PROCEDURE_TYPES,
@@ -153,13 +155,21 @@ export function MatterEditForm({
             ))}
           </select>
         </div>
-        <div className="field sm:col-span-2">
-          <Label htmlFor="counterparts">Contraparte(s)</Label>
-          <Input
-            id="counterparts"
-            name="counterparts"
-            defaultValue={matter.counterparts ?? ""}
-          />
+        <CounterpartsField defaultValue={matter.counterparts} />
+        <div className="field">
+          <Label htmlFor="fee_modality">Modalidad de honorarios</Label>
+          <select
+            id="fee_modality"
+            name="fee_modality"
+            defaultValue={matter.fee_modality ?? ""}
+          >
+            <option value="">Sin definir</option>
+            {FEE_MODALITIES.map((m) => (
+              <option key={m.value} value={m.value}>
+                {m.label}
+              </option>
+            ))}
+          </select>
         </div>
         <div className="field">
           <Label htmlFor="radicado">Radicado</Label>

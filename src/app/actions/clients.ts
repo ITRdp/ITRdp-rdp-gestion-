@@ -77,6 +77,7 @@ export async function createClientAction(
       document_type: documentType,
       document_number: documentNumber,
       document_dv: documentDv,
+      trade_name: nullStr(formData, "trade_name"),
       city: nullStr(formData, "city"),
       department: nullStr(formData, "department"),
       address: nullStr(formData, "address"),
@@ -155,6 +156,7 @@ export async function updateClientAction(
     .update({
       name,
       legal_name: nullStr(formData, "legal_name") || name,
+      trade_name: nullStr(formData, "trade_name"),
       person_type: personType,
       document_type: documentType,
       document_number: documentNumber,

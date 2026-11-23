@@ -12,8 +12,12 @@ const initial: FormState = {};
 
 export function EventForm({
   matters,
+  defaultMatterId,
+  defaultStartsAt,
 }: {
   matters: { id: string; code: string; title: string }[];
+  defaultMatterId?: string;
+  defaultStartsAt?: string;
 }) {
   const [state, formAction, pending] = useActionState(createEventAction, initial);
 
@@ -47,7 +51,11 @@ export function EventForm({
         </div>
         <div className="field">
           <Label htmlFor="matter_id">Asunto (opcional)</Label>
-          <select id="matter_id" name="matter_id" defaultValue="">
+          <select
+            id="matter_id"
+            name="matter_id"
+            defaultValue={defaultMatterId ?? ""}
+          >
             <option value="">Sin vincular</option>
             {matters.map((m) => (
               <option key={m.id} value={m.id}>
@@ -58,7 +66,13 @@ export function EventForm({
         </div>
         <div className="field">
           <Label htmlFor="starts_at">Inicio</Label>
-          <Input id="starts_at" name="starts_at" type="datetime-local" required />
+          <Input
+            id="starts_at"
+            name="starts_at"
+            type="datetime-local"
+            required
+            defaultValue={defaultStartsAt}
+          />
         </div>
         <div className="field">
           <Label htmlFor="ends_at">Fin (opcional)</Label>

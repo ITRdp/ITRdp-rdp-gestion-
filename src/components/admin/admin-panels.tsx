@@ -41,6 +41,7 @@ const HOLIDAY_KINDS = [
   { value: "festivo_nacional", label: "Festivo nacional" },
   { value: "festivo_religioso", label: "Festivo religioso" },
   { value: "puente", label: "Puente" },
+  { value: "vacancia_judicial", label: "Vacancia judicial" },
   { value: "otro", label: "Otro" },
 ];
 
@@ -122,7 +123,19 @@ export function MembersTable({
       {!members.length ? (
         <EmptyState title="Sin miembros." />
       ) : (
-        <div className="overflow-x-auto rounded-md border border-[var(--line)]">
+        <>
+        <ul className="mb-4 grid gap-3 md:hidden">
+          {members.map((m) => (
+            <li key={`card-${m.id}`} className="surface rounded-md p-3 text-sm">
+              <p className="font-medium">{m.full_name}</p>
+              <p className="text-[var(--muted)]">{m.email}</p>
+              <p className="mt-1 text-xs capitalize text-[var(--muted)]">
+                {m.role} · {m.enabled ? "Activo" : "Deshabilitado"}
+              </p>
+            </li>
+          ))}
+        </ul>
+        <div className="hidden overflow-x-auto rounded-md border border-[var(--line)] md:block">
           <table className="w-full min-w-[36rem] text-left text-sm">
             <thead className="bg-[var(--surface)] text-xs uppercase tracking-wide text-[var(--muted)]">
               <tr>
@@ -130,7 +143,9 @@ export function MembersTable({
                 <th className="px-3 py-2">Correo</th>
                 <th className="px-3 py-2">Rol</th>
                 <th className="px-3 py-2">Estado</th>
-                <th className="px-3 py-2">Acciones</th>
+                <th className="sticky right-0 bg-[var(--surface)] px-3 py-2">
+                  Acciones
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -211,6 +226,7 @@ export function MembersTable({
             </tbody>
           </table>
         </div>
+        </>
       )}
     </section>
   );
@@ -229,8 +245,15 @@ export function HolidaysAdmin({ days }: { days: NonBusinessDay[] }) {
       <form action={action} className="surface grid gap-3 rounded-md p-4">
         <h3 className="font-medium text-[var(--ink)]">Agregar día no hábil</h3>
         <div>
-          <Label htmlFor="day">Fecha</Label>
+          <Label htmlFor="day">Fecha inicio</Label>
           <Input id="day" name="day" type="date" required />
+        </div>
+        <div>
+          <Label htmlFor="ends_on">Fecha fin (vacancia / rango)</Label>
+          <Input id="ends_on" name="ends_on" type="date" />
+          <p className="hint mt-1">
+            Opcional. Si la indicas, se registran todos los días del rango.
+          </p>
         </div>
         <div>
           <Label htmlFor="name">Nombre</Label>

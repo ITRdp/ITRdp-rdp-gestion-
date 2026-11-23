@@ -10,7 +10,8 @@
   --wine-50: #faf5f6;
 
   --gold-400: #d49f69;
-  --gold-500: #c48a4f;
+  /* Más oscuro para contraste AA sobre fondo claro */
+  --gold-500: #9a6a35;
   --gold-300: #e0b88a;
   --gold-100: #f8efe4;
   --gold-50: #fcf7f1;

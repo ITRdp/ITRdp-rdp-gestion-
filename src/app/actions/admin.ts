@@ -184,28 +184,51 @@ export async function addNonBusinessDayAction(
   await requireAdmin();
   const supabase = await createClient();
   const day = str(formData, "day");
+  const endsOn = nullStr(formData, "ends_on");
   const name = str(formData, "name");
   const kind = str(formData, "kind") || "festivo_nacional";
+  const notes = nullStr(formData, "notes");
 
   if (!day || !name) return { error: "Fecha y nombre obligatorios." };
+  if (endsOn && endsOn < day) {
+    return { error: "La fecha fin debe ser ≥ a la fecha inicio." };
+  }
 
-  const { error } = await supabase.from("non_business_days").insert({
-    day,
-    name,
+  const days: string[] = [day];
+  if (endsOn && endsOn !== day) {
+    const cur = new Date(`${day}T12:00:00`);
+    const end = new Date(`${endsOn}T12:00:00`);
+    while (cur < end) {
+      cur.setDate(cur.getDate() + 1);
+      days.push(cur.toISOString().slice(0, 10));
+    }
+  }
+
+  const rows = days.map((d, i) => ({
+    day: d,
+    name: days.length > 1 ? `${name} (${i + 1}/${days.length})` : name,
     kind,
-    notes: nullStr(formData, "notes"),
-  });
+    notes,
+    ends_on: endsOn && endsOn !== day ? endsOn : null,
+  }));
+
+  const { error } = await supabase.from("non_business_days").insert(rows);
 
   if (error) {
     return {
       error: error.message.includes("duplicate")
-        ? "Esa fecha ya está registrada."
+        ? "Alguna fecha del rango ya está registrada."
         : error.message,
     };
   }
   revalidatePath("/admin");
   revalidatePath("/agenda");
-  return { success: "Día no hábil agregado." };
+  return {
+    success:
+      days.length > 1
+        ? `Rango no hábil agregado (${days.length} días).`
+        : "Día no hábil agregado.",
+  };
 }
 
 export async function deleteNonBusinessDayAction(

@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { addClientContactAction } from "@/app/actions/clients";
 import { AppShellHost as AppShell } from "@/components/AppShellHost";
 import { ClientForm } from "@/components/ClientForm";
+import { EditGate } from "@/components/EditGate";
 import { EmptyState } from "@/components/EmptyState";
 import { NewMatterDrawer } from "@/components/NewMatterDrawer";
 import { Button } from "@/components/ui/button";
@@ -110,11 +111,10 @@ export default async function ClienteDetailPage({
       </header>
 
       <div className="grid gap-8 lg:grid-cols-2">
-        <section>
-          <h2 className="font-display mb-3 text-xl text-[var(--wine-900)]">
-            Datos
-          </h2>
-          <ClientForm client={client as Client} mode="edit" />
+        <section className="grid gap-3">
+          <EditGate title="Datos">
+            <ClientForm client={client as Client} mode="edit" />
+          </EditGate>
         </section>
 
         <div className="grid gap-8">

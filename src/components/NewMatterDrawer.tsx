@@ -15,7 +15,9 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import { CounterpartsField } from "@/components/CounterpartsField";
 import {
+  FEE_MODALITIES,
   MATTER_AREAS,
   MATTER_PRIORITIES,
   MATTER_PROCEDURE_TYPES,
@@ -283,14 +285,17 @@ export function NewMatterDrawer({
               </ul>
             </div>
 
+            <CounterpartsField />
             <div className="field">
-              <Label htmlFor="counterparts">Contraparte(s)</Label>
-              <Input
-                id="counterparts"
-                name="counterparts"
-                placeholder="Nombre; otro nombre"
-              />
-              <p className="hint">Separa nombres con punto y coma.</p>
+              <Label htmlFor="fee_modality">Modalidad de honorarios</Label>
+              <select id="fee_modality" name="fee_modality" defaultValue="">
+                <option value="">Sin definir</option>
+                {FEE_MODALITIES.map((m) => (
+                  <option key={m.value} value={m.value}>
+                    {m.label}
+                  </option>
+                ))}
+              </select>
             </div>
 
             <div className="grid gap-3 sm:grid-cols-2">
