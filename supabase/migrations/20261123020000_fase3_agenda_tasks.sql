@@ -64,9 +64,9 @@ insert into public.non_business_days (day, name, kind, notes) values
   ('2027-03-25', 'Jueves Santo', 'festivo_religioso', 'Seed Fase 3 — validar'),
   ('2027-03-26', 'Viernes Santo', 'festivo_religioso', 'Seed Fase 3 — validar'),
   ('2027-05-01', 'Día del Trabajo', 'festivo_nacional', 'Seed Fase 3 — validar'),
-  ('2027-05-17', 'Ascensión del Señor', 'festivo_religioso', 'Seed Fase 3 — validar (traslado)'),
-  ('2027-06-07', 'Corpus Christi', 'festivo_religioso', 'Seed Fase 3 — validar (traslado)'),
-  ('2027-06-14', 'Sagrado Corazón', 'festivo_religioso', 'Seed Fase 3 — validar (traslado)'),
+  ('2027-05-10', 'Ascensión del Señor', 'festivo_religioso', 'Seed Fase 3 — validar (traslado)'),
+  ('2027-05-31', 'Corpus Christi', 'festivo_religioso', 'Seed Fase 3 — validar (traslado)'),
+  ('2027-06-07', 'Sagrado Corazón', 'festivo_religioso', 'Seed Fase 3 — validar (traslado)'),
   ('2027-07-05', 'San Pedro y San Pablo', 'festivo_religioso', 'Seed Fase 3 — validar (traslado)'),
   ('2027-07-20', 'Independencia de Colombia', 'festivo_nacional', 'Seed Fase 3 — validar'),
   ('2027-08-07', 'Batalla de Boyacá', 'festivo_nacional', 'Seed Fase 3 — validar'),
@@ -235,7 +235,7 @@ begin
         'alta',
         '[{"id":"1","text":"Leer memorial","done":false},{"id":"2","text":"Anotar observaciones","done":false},{"id":"3","text":"Devolver al redactor","done":false}]'::jsonb,
         2,
-        'civil',
+        'responsabilidad_seguros',
         admin_id
       ),
       (
@@ -244,7 +244,7 @@ begin
         'urgente',
         '[{"id":"1","text":"Confirmar fecha y sala","done":false},{"id":"2","text":"Armar índice de pruebas","done":false},{"id":"3","text":"Brief al cliente","done":false}]'::jsonb,
         5,
-        'laboral',
+        'empresa',
         admin_id
       ),
       (

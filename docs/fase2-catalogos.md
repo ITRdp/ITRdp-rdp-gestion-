@@ -1,14 +1,31 @@
 # Fase 2 — Catálogos de asuntos
 
-Catálogos razonables usados en RDP Gestión. Son editables en código (`src/lib/catalogs.ts`) y validados en la migración SQL.
+Catálogos usados en RDP Gestión (`src/lib/catalogs.ts`), validados en SQL.
+Áreas actualizadas post Fase 5 (migración `20261123120000_fix_festivos_areas_protect.sql`).
 
-## Áreas
+## Áreas (firma)
 
-Civil, Laboral, Comercial, Penal, Familia, Administrativo, Tributario, Otros.
+Prioridad Rojas De Paz:
+
+| Valor | Etiqueta |
+|---|---|
+| `responsabilidad_seguros` | Responsabilidad & seguros |
+| `empresa` | Empresa |
+| `consumidor` | Consumidor |
+| `insolvencia` | Insolvencia |
+
+Complementarias:
+
+| Valor | Etiqueta |
+|---|---|
+| `comercial` | Comercial |
+| `tributario` | Tributario |
+| `societario` | Societario |
+| `otro` | Otro |
 
 ## Tipos por área
 
-Cada área tiene un conjunto corto de tipos (p. ej. Comercial → Societario, Mercantil, Insolvencia, General). Si el despacho define tipos oficiales por área, sustituir el mapa `MATTER_TYPES_BY_AREA`.
+Cada área tiene un conjunto corto de tipos en `MATTER_TYPES_BY_AREA`. Sustituir si el despacho define tipos oficiales.
 
 ## Etapas (pipeline / Kanban)
 

@@ -44,4 +44,6 @@ Usado en Mi jornada y ficha de asunto (seguimiento / vencimiento procesal).
 
 ## Validación de festivos
 
-El seed es aproximado (Ley Emiliani / calendario típico). **Revisar y editar** en SQL o (futuro) panel admin antes de producción.
+El seed es aproximado (Ley Emiliani / calendario típico). **Revisar y editar** en `/admin` (Días no hábiles) o SQL antes de producción.
+
+Corrección Ascensión / Corpus / Sagrado Corazón **2027**: seed Fase 3 actualizado + migración `20261123120000_fix_festivos_areas_protect.sql` para bases ya aplicadas.

@@ -426,7 +426,7 @@ security definer
 set search_path = public
 as $$
 begin
-  if not public.is_admin_member() then
+  if auth.uid() is not null and not public.is_admin_member() then
     new.role := old.role;
     new.enabled := old.enabled;
     new.email := old.email;

@@ -20,51 +20,50 @@ export const DOCUMENT_TYPES = [
   { value: "OTRO", label: "Otro" },
 ] as const;
 
+/** Áreas alineadas a la firma (prioridad) + comercial/tributario/societario/otro. */
 export const MATTER_AREAS = [
-  { value: "civil", label: "Civil" },
-  { value: "laboral", label: "Laboral" },
+  { value: "responsabilidad_seguros", label: "Responsabilidad & seguros" },
+  { value: "empresa", label: "Empresa" },
+  { value: "consumidor", label: "Consumidor" },
+  { value: "insolvencia", label: "Insolvencia" },
   { value: "comercial", label: "Comercial" },
-  { value: "penal", label: "Penal" },
-  { value: "familia", label: "Familia" },
-  { value: "administrativo", label: "Administrativo" },
   { value: "tributario", label: "Tributario" },
-  { value: "otros", label: "Otros" },
+  { value: "societario", label: "Societario" },
+  { value: "otro", label: "Otro" },
 ] as const;
 
-/** Tipos de asunto por área (catálogo razonable; ampliar según práctica del despacho). */
-export const MATTER_TYPES_BY_AREA: Record<string, { value: string; label: string }[]> = {
-  civil: [
-    { value: "contractual", label: "Contractual" },
-    { value: "responsabilidad", label: "Responsabilidad civil" },
-    { value: "propiedad", label: "Propiedad / posesión" },
+/** Tipos de asunto por área (ampliar según práctica del despacho). */
+export const MATTER_TYPES_BY_AREA: Record<
+  string,
+  { value: string; label: string }[]
+> = {
+  responsabilidad_seguros: [
+    { value: "rc_extracontractual", label: "RC extracontractual" },
+    { value: "seguros", label: "Seguros / reclamación" },
+    { value: "productos", label: "Productos defectuosos" },
     { value: "general", label: "General" },
   ],
-  laboral: [
-    { value: "despido", label: "Despido / liquidación" },
-    { value: "tutela_laboral", label: "Tutela laboral" },
-    { value: "seguridad_social", label: "Seguridad social" },
+  empresa: [
+    { value: "contratos", label: "Contratos empresariales" },
+    { value: "laboral_empresa", label: "Laboral empresarial" },
+    { value: "cumplimiento", label: "Cumplimiento / compliance" },
+    { value: "general", label: "General" },
+  ],
+  consumidor: [
+    { value: "proteccion", label: "Protección al consumidor" },
+    { value: "garantias", label: "Garantías" },
+    { value: "publicidad", label: "Publicidad engañosa" },
+    { value: "general", label: "General" },
+  ],
+  insolvencia: [
+    { value: "reorganizacion", label: "Reorganización" },
+    { value: "liquidacion", label: "Liquidación" },
+    { value: "acreedores", label: "Acreedores" },
     { value: "general", label: "General" },
   ],
   comercial: [
-    { value: "societario", label: "Societario" },
     { value: "mercantil", label: "Mercantil / contratos" },
-    { value: "insolvenicia", label: "Insolvencia" },
-    { value: "general", label: "General" },
-  ],
-  penal: [
-    { value: "defensa", label: "Defensa" },
-    { value: "victima", label: "Representación víctima" },
-    { value: "general", label: "General" },
-  ],
-  familia: [
-    { value: "alimentos", label: "Alimentos" },
-    { value: "divorcio", label: "Divorcio / cesación" },
-    { value: "custodia", label: "Custodia / visitas" },
-    { value: "general", label: "General" },
-  ],
-  administrativo: [
-    { value: "nulidad", label: "Nulidad / restablecimiento" },
-    { value: "contratacion", label: "Contratación estatal" },
+    { value: "competencia", label: "Competencia" },
     { value: "general", label: "General" },
   ],
   tributario: [
@@ -72,7 +71,13 @@ export const MATTER_TYPES_BY_AREA: Record<string, { value: string; label: string
     { value: "devolucion", label: "Devolución / compensación" },
     { value: "general", label: "General" },
   ],
-  otros: [{ value: "general", label: "General" }],
+  societario: [
+    { value: "constitucion", label: "Constitución / reformas" },
+    { value: "gobierno", label: "Gobierno corporativo" },
+    { value: "conflictos", label: "Conflictos societarios" },
+    { value: "general", label: "General" },
+  ],
+  otro: [{ value: "general", label: "General" }],
 };
 
 export const MATTER_STAGES = [

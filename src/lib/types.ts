@@ -3,14 +3,14 @@ export type PersonType = "natural" | "juridica";
 export type DocumentType = "NIT" | "CC" | "CE" | "PAS" | "PPT" | "OTRO";
 export type MatterStatus = "abierto" | "en_pausa" | "cerrado" | "archivado";
 export type MatterArea =
-  | "civil"
-  | "laboral"
+  | "responsabilidad_seguros"
+  | "empresa"
+  | "consumidor"
+  | "insolvencia"
   | "comercial"
-  | "penal"
-  | "familia"
-  | "administrativo"
   | "tributario"
-  | "otros";
+  | "societario"
+  | "otro";
 export type MatterStage =
   | "ingreso"
   | "analisis"

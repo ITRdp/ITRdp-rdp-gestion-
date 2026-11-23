@@ -43,7 +43,7 @@ export function NewMatterDrawer({
   const [state, formAction, pending] = useActionState(createMatterAction, initial);
 
   const types = useMemo(
-    () => MATTER_TYPES_BY_AREA[area] ?? MATTER_TYPES_BY_AREA.otros,
+    () => MATTER_TYPES_BY_AREA[area] ?? MATTER_TYPES_BY_AREA.otro,
     [area],
   );
 

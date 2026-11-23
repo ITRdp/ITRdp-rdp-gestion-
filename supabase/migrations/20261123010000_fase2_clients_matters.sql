@@ -112,8 +112,8 @@ alter table public.matters
   add column if not exists code text,
   add column if not exists area text not null default 'comercial'
     check (area in (
-      'civil', 'laboral', 'comercial', 'penal', 'familia',
-      'administrativo', 'tributario', 'otros'
+      'responsabilidad_seguros', 'empresa', 'consumidor', 'insolvencia',
+      'comercial', 'tributario', 'societario', 'otro'
     )),
   add column if not exists matter_type text not null default 'general',
   add column if not exists stage text not null default 'ingreso'
