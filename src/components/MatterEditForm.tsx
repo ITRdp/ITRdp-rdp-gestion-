@@ -7,6 +7,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { CounterpartsField } from "@/components/CounterpartsField";
+import { CourtSuggest } from "@/components/CourtSuggest";
+import { LocationFields } from "@/components/LocationFields";
+import { DatePicker } from "@/components/ui/date-picker";
 import {
   FEE_MODALITIES,
   MATTER_AREAS,
@@ -23,10 +26,12 @@ export function MatterEditForm({
   matter,
   clients,
   members,
+  courtSuggestions = [],
 }: {
   matter: Matter;
   clients: Pick<Client, "id" | "name">[];
   members: Member[];
+  courtSuggestions?: string[];
 }) {
   const [state, formAction, pending] = useActionState(updateMatterAction, initial);
   const [area, setArea] = useState(matter.area);
@@ -180,24 +185,20 @@ export function MatterEditForm({
             defaultValue={matter.radicado ?? ""}
           />
         </div>
-        <div className="field">
-          <Label htmlFor="court_name">Despacho</Label>
-          <Input
-            id="court_name"
-            name="court_name"
-            defaultValue={matter.court_name ?? ""}
-          />
-        </div>
-        <div className="field">
-          <Label htmlFor="city">Ciudad</Label>
-          <Input id="city" name="city" defaultValue={matter.city ?? ""} />
-        </div>
+        <CourtSuggest
+          defaultValue={matter.court_name}
+          suggestions={courtSuggestions}
+        />
+        <LocationFields
+          cityDefault={matter.city}
+          cityLabel="Ciudad"
+          persistDepartment={false}
+        />
         <div className="field">
           <Label htmlFor="procedural_deadline">Venc. procesal</Label>
-          <Input
+          <DatePicker
             id="procedural_deadline"
             name="procedural_deadline"
-            type="date"
             defaultValue={matter.procedural_deadline ?? ""}
           />
         </div>
@@ -219,19 +220,17 @@ export function MatterEditForm({
         </div>
         <div className="field">
           <Label htmlFor="opened_at">Apertura</Label>
-          <Input
+          <DatePicker
             id="opened_at"
             name="opened_at"
-            type="date"
             defaultValue={matter.opened_at ?? ""}
           />
         </div>
         <div className="field">
           <Label htmlFor="closed_at">Cierre</Label>
-          <Input
+          <DatePicker
             id="closed_at"
             name="closed_at"
-            type="date"
             defaultValue={matter.closed_at ?? ""}
           />
         </div>

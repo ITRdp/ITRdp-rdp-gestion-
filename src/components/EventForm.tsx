@@ -6,6 +6,8 @@ import { createEventAction, type FormState } from "@/app/actions/events";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { DateTimePicker } from "@/components/ui/date-picker";
+import { NativeSelect } from "@/components/ui/select";
 import { EVENT_TYPES } from "@/lib/catalogs";
 
 const initial: FormState = {};
@@ -41,17 +43,17 @@ export function EventForm({
       <div className="grid gap-3 sm:grid-cols-2">
         <div className="field">
           <Label htmlFor="event_type">Tipo</Label>
-          <select id="event_type" name="event_type" defaultValue="audiencia">
+          <NativeSelect id="event_type" name="event_type" defaultValue="audiencia">
             {EVENT_TYPES.map((t) => (
               <option key={t.value} value={t.value}>
                 {t.label}
               </option>
             ))}
-          </select>
+          </NativeSelect>
         </div>
         <div className="field">
           <Label htmlFor="matter_id">Asunto (opcional)</Label>
-          <select
+          <NativeSelect
             id="matter_id"
             name="matter_id"
             defaultValue={defaultMatterId ?? ""}
@@ -62,21 +64,20 @@ export function EventForm({
                 {m.code} · {m.title}
               </option>
             ))}
-          </select>
+          </NativeSelect>
         </div>
         <div className="field">
           <Label htmlFor="starts_at">Inicio</Label>
-          <Input
+          <DateTimePicker
             id="starts_at"
             name="starts_at"
-            type="datetime-local"
             required
             defaultValue={defaultStartsAt}
           />
         </div>
         <div className="field">
           <Label htmlFor="ends_at">Fin (opcional)</Label>
-          <Input id="ends_at" name="ends_at" type="datetime-local" />
+          <DateTimePicker id="ends_at" name="ends_at" />
         </div>
         <div className="field sm:col-span-2">
           <Label htmlFor="location">Lugar</Label>

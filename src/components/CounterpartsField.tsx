@@ -5,31 +5,10 @@ import { X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-
-/** Persistimos como "Nombre|doc; Nombre2|doc2" (doc opcional). */
-export function parseCounterparts(raw: string | null | undefined) {
-  if (!raw?.trim()) return [] as { name: string; document?: string }[];
-  return raw
-    .split(";")
-    .map((part) => part.trim())
-    .filter(Boolean)
-    .map((part) => {
-      const [name, document] = part.split("|").map((s) => s.trim());
-      return { name: name ?? "", document: document || undefined };
-    })
-    .filter((c) => c.name);
-}
-
-export function serializeCounterparts(
-  items: { name: string; document?: string }[],
-) {
-  return items
-    .map((c) =>
-      c.document?.trim() ? `${c.name.trim()}|${c.document.trim()}` : c.name.trim(),
-    )
-    .filter(Boolean)
-    .join("; ");
-}
+import {
+  parseCounterparts,
+  serializeCounterparts,
+} from "@/lib/counterparts";
 
 export function CounterpartsField({
   defaultValue,
@@ -43,7 +22,10 @@ export function CounterpartsField({
   function add() {
     const n = name.trim();
     if (!n) return;
-    setItems((prev) => [...prev, { name: n, document: document.trim() || undefined }]);
+    setItems((prev) => [
+      ...prev,
+      { name: n, document: document.trim() || undefined },
+    ]);
     setName("");
     setDocument("");
   }
@@ -71,7 +53,9 @@ export function CounterpartsField({
                 type="button"
                 className="rounded p-0.5 text-[var(--muted)] hover:text-[var(--danger)]"
                 aria-label={`Quitar ${c.name}`}
-                onClick={() => setItems((prev) => prev.filter((_, j) => j !== i))}
+                onClick={() =>
+                  setItems((prev) => prev.filter((_, j) => j !== i))
+                }
               >
                 <X className="h-3.5 w-3.5" />
               </button>

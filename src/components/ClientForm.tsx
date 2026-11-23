@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { LocationFields } from "@/components/LocationFields";
+import { NativeSelect } from "@/components/ui/select";
 import { DOCUMENT_TYPES, PERSON_TYPES } from "@/lib/catalogs";
 import { nitCheckDigit } from "@/lib/nit";
 import type { Client } from "@/lib/types";
@@ -54,7 +55,7 @@ export function ClientForm({
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="field">
           <Label htmlFor="person_type">Tipo de persona</Label>
-          <select
+          <NativeSelect
             id="person_type"
             name="person_type"
             defaultValue={client?.person_type ?? "juridica"}
@@ -64,7 +65,7 @@ export function ClientForm({
                 {p.label}
               </option>
             ))}
-          </select>
+          </NativeSelect>
         </div>
         <div className="field">
           <Label htmlFor="name">Nombre / razón social</Label>
@@ -88,7 +89,7 @@ export function ClientForm({
         </div>
         <div className="field">
           <Label htmlFor="document_type">Tipo de documento</Label>
-          <select
+          <NativeSelect
             id="document_type"
             name="document_type"
             value={docType}
@@ -99,7 +100,7 @@ export function ClientForm({
                 {d.label}
               </option>
             ))}
-          </select>
+          </NativeSelect>
         </div>
         <div className="grid grid-cols-[1fr_auto] gap-2">
           <div className="field">

@@ -230,8 +230,9 @@ function MesView({
                 <span className="font-medium">{d.getDate()}</span>
                 {holiday ? (
                   <span
-                    className="truncate text-[10px] text-[var(--wine-700)]"
+                    className="max-w-[70%] cursor-help text-[10px] leading-tight text-[var(--wine-700)]"
                     title={holiday}
+                    aria-label={holiday}
                   >
                     {holiday}
                   </span>

@@ -1,10 +1,12 @@
 "use client";
 
-import { useActionState, useState, useTransition } from "react";
+import { useActionState, useEffect, useState, useTransition } from "react";
 import {
   addNonBusinessDayAction,
+  addStageDefAction,
   deleteNonBusinessDayAction,
   inviteMemberAction,
+  reorderStageDefsAction,
   setMemberEnabledAction,
   updateMemberRoleAction,
   updateMyNotificationPrefsAction,
@@ -33,7 +35,10 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { DatePicker } from "@/components/ui/date-picker";
+import { NativeSelect } from "@/components/ui/select";
 import { EmptyState } from "@/components/EmptyState";
+import { GripVertical } from "lucide-react";
 
 const initial: FormState = {};
 
@@ -246,33 +251,32 @@ export function HolidaysAdmin({ days }: { days: NonBusinessDay[] }) {
         <h3 className="font-medium text-[var(--ink)]">Agregar día no hábil</h3>
         <div>
           <Label htmlFor="day">Fecha inicio</Label>
-          <Input id="day" name="day" type="date" required />
+          <DatePicker id="day" name="day" required />
         </div>
         <div>
           <Label htmlFor="ends_on">Fecha fin (vacancia / rango)</Label>
-          <Input id="ends_on" name="ends_on" type="date" />
+          <DatePicker id="ends_on" name="ends_on" />
           <p className="hint mt-1">
             Opcional. Si la indicas, se registran todos los días del rango.
           </p>
         </div>
         <div>
-          <Label htmlFor="name">Nombre</Label>
-          <Input id="name" name="name" required />
-        </div>
-        <div>
           <Label htmlFor="kind">Tipo</Label>
-          <select
+          <NativeSelect
             id="kind"
             name="kind"
             defaultValue="festivo_nacional"
-            className="flex h-10 w-full rounded-md border border-[var(--line)] bg-white px-3 text-sm"
           >
             {HOLIDAY_KINDS.map((k) => (
               <option key={k.value} value={k.value}>
                 {k.label}
               </option>
             ))}
-          </select>
+          </NativeSelect>
+        </div>
+        <div>
+          <Label htmlFor="name">Nombre</Label>
+          <Input id="name" name="name" required />
         </div>
         <div>
           <Label htmlFor="notes">Notas</Label>
@@ -335,28 +339,111 @@ export function HolidaysAdmin({ days }: { days: NonBusinessDay[] }) {
 export function StagesAdmin({ stages }: { stages: MatterStageDef[] }) {
   const [pending, startTransition] = useTransition();
   const [msg, setMsg] = useState<string | null>(null);
-  const byType = MATTER_PROCEDURE_TYPES.map((t) => ({
-    ...t,
-    rows: stages.filter((s) => s.matter_type === t.value),
-  }));
+  const [showInactive, setShowInactive] = useState(false);
+  const [local, setLocal] = useState(stages);
+  const [dragId, setDragId] = useState<string | null>(null);
+  const [addState, addAction, addPending] = useActionState(
+    addStageDefAction,
+    initial,
+  );
+
+  useEffect(() => {
+    setLocal(stages);
+  }, [stages]);
+
+  const byType = MATTER_PROCEDURE_TYPES.map((t) => {
+    const rows = local
+      .filter((s) => s.matter_type === t.value)
+      .filter((s) => showInactive || s.enabled)
+      .slice()
+      .sort((a, b) => a.sort_order - b.sort_order);
+    return { ...t, rows };
+  });
+
+  function onDrop(type: string, targetId: string) {
+    if (!dragId || dragId === targetId) return;
+    const typeRows = local
+      .filter((s) => s.matter_type === type)
+      .slice()
+      .sort((a, b) => a.sort_order - b.sort_order);
+    const from = typeRows.findIndex((s) => s.id === dragId);
+    const to = typeRows.findIndex((s) => s.id === targetId);
+    if (from < 0 || to < 0) return;
+    const next = [...typeRows];
+    const [moved] = next.splice(from, 1);
+    next.splice(to, 0, moved!);
+    const reindexed = next.map((s, i) => ({ ...s, sort_order: (i + 1) * 10 }));
+    setLocal((prev) => [
+      ...prev.filter((s) => s.matter_type !== type),
+      ...reindexed,
+    ]);
+    startTransition(async () => {
+      const res = await reorderStageDefsAction(reindexed.map((s) => s.id));
+      setMsg(res.error ?? res.success ?? null);
+    });
+    setDragId(null);
+  }
 
   return (
     <section className="grid gap-4">
-      <div>
-        <h3 className="font-display text-xl text-[var(--wine-900)]">
-          Etapas por tipo de asunto
-        </h3>
-        <p className="mt-1 text-sm text-[var(--muted)]">
-          «Gestiones adicionales» va antes de Cierre y se puede saltar a ella
-          desde cualquier etapa previa en la ficha. «En pausa» es un estado, no
-          una etapa.
-        </p>
-        {msg ? <p className="mt-2 text-sm text-[var(--muted)]">{msg}</p> : null}
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h3 className="font-display text-xl text-[var(--wine-900)]">
+            Etapas por tipo de asunto
+          </h3>
+          <p className="mt-1 text-sm text-[var(--muted)]">
+            Arrastra para reordenar. «En pausa» es un estado, no una etapa.
+          </p>
+        </div>
+        <label className="flex items-center gap-2 text-sm">
+          <input
+            type="checkbox"
+            checked={showInactive}
+            onChange={(e) => setShowInactive(e.target.checked)}
+          />
+          Mostrar inactivas
+        </label>
       </div>
+      {msg ? <p className="text-sm text-[var(--muted)]">{msg}</p> : null}
+      {addState.error ? (
+        <p className="text-sm text-red-700">{addState.error}</p>
+      ) : null}
+      {addState.success ? (
+        <p className="text-sm text-emerald-700">{addState.success}</p>
+      ) : null}
+
+      <form
+        action={addAction}
+        className="surface grid gap-3 rounded-md p-4 sm:grid-cols-[1fr_1fr_auto] sm:items-end"
+      >
+        <div className="field">
+          <Label htmlFor="add_matter_type">Tipo</Label>
+          <NativeSelect
+            id="add_matter_type"
+            name="matter_type"
+            defaultValue="judicial"
+            required
+          >
+            {MATTER_PROCEDURE_TYPES.map((t) => (
+              <option key={t.value} value={t.value}>
+                {t.label}
+              </option>
+            ))}
+          </NativeSelect>
+        </div>
+        <div className="field">
+          <Label htmlFor="add_label">Nueva etapa</Label>
+          <Input id="add_label" name="label" required placeholder="Etiqueta" />
+        </div>
+        <Button type="submit" disabled={addPending || pending}>
+          {addPending ? "Agregando…" : "Agregar etapa"}
+        </Button>
+      </form>
+
       {!stages.length ? (
         <EmptyState
           title="Sin etapas en base de datos"
-          description="Aplica 20261123140000_prelanzamiento_stages.sql y luego 20261123150000_etapas_acordadas.sql."
+          description="Aplica las migraciones de etapas (140000–150000)."
         />
       ) : (
         <div className="grid gap-4 lg:grid-cols-2">
@@ -365,50 +452,82 @@ export function StagesAdmin({ stages }: { stages: MatterStageDef[] }) {
               <h4 className="mb-2 font-medium text-[var(--wine-900)]">
                 {t.label}
               </h4>
-              <ul className="grid gap-2 text-sm">
-                {t.rows.map((s) => (
-                  <li
-                    key={s.id}
-                    className="flex flex-wrap items-center gap-2 border-b border-[var(--line)] pb-2 last:border-0"
-                  >
-                    <code className="text-xs text-[var(--muted)]">
-                      {s.stage_key}
-                    </code>
-                    <Input
-                      className="h-8 flex-1"
-                      defaultValue={s.label}
-                      disabled={pending}
-                      onBlur={(e) => {
-                        const label = e.target.value.trim();
-                        if (!label || label === s.label) return;
-                        startTransition(async () => {
-                          const res = await updateStageDefAction(s.id, {
-                            label,
-                          });
-                          setMsg(res.error ?? res.success ?? null);
-                        });
-                      }}
-                    />
-                    <label className="flex items-center gap-1 text-xs">
-                      <input
-                        type="checkbox"
-                        defaultChecked={s.enabled}
+              {!t.rows.length ? (
+                <p className="text-sm text-[var(--muted)]">
+                  {showInactive
+                    ? "Sin etapas."
+                    : "Sin etapas activas. Activa «Mostrar inactivas»."}
+                </p>
+              ) : (
+                <ul className="grid gap-2 text-sm">
+                  {t.rows.map((s) => (
+                    <li
+                      key={s.id}
+                      draggable
+                      onDragStart={() => setDragId(s.id)}
+                      onDragOver={(e) => e.preventDefault()}
+                      onDrop={() => onDrop(t.value, s.id)}
+                      className={`flex flex-wrap items-center gap-2 border-b border-[var(--line)] pb-2 last:border-0 ${
+                        !s.enabled ? "opacity-50" : ""
+                      }`}
+                    >
+                      <button
+                        type="button"
+                        className="cursor-grab text-[var(--muted)] active:cursor-grabbing"
+                        aria-label="Reordenar"
+                      >
+                        <GripVertical className="h-4 w-4" />
+                      </button>
+                      <Input
+                        className="h-8 min-w-[8rem] flex-1"
+                        defaultValue={s.label}
                         disabled={pending}
-                        onChange={(e) => {
-                          const enabled = e.target.checked;
+                        onBlur={(e) => {
+                          const label = e.target.value.trim();
+                          if (!label || label === s.label) return;
                           startTransition(async () => {
                             const res = await updateStageDefAction(s.id, {
-                              enabled,
+                              label,
                             });
                             setMsg(res.error ?? res.success ?? null);
+                            if (!res.error) {
+                              setLocal((prev) =>
+                                prev.map((x) =>
+                                  x.id === s.id ? { ...x, label } : x,
+                                ),
+                              );
+                            }
                           });
                         }}
                       />
-                      Activa
-                    </label>
-                  </li>
-                ))}
-              </ul>
+                      <label className="flex items-center gap-1 text-xs">
+                        <input
+                          type="checkbox"
+                          checked={s.enabled}
+                          disabled={pending}
+                          onChange={(e) => {
+                            const enabled = e.target.checked;
+                            startTransition(async () => {
+                              const res = await updateStageDefAction(s.id, {
+                                enabled,
+                              });
+                              setMsg(res.error ?? res.success ?? null);
+                              if (!res.error) {
+                                setLocal((prev) =>
+                                  prev.map((x) =>
+                                    x.id === s.id ? { ...x, enabled } : x,
+                                  ),
+                                );
+                              }
+                            });
+                          }}
+                        />
+                        Activa
+                      </label>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
           ))}
         </div>

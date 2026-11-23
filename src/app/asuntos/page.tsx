@@ -57,7 +57,7 @@ export default async function AsuntosPage({
     );
   }
 
-  const [{ data: matters }, { data: members }, { data: clients }] =
+  const [{ data: matters }, { data: members }, { data: clients }, { data: courts }] =
     await Promise.all([
       mattersQuery,
       supabase.from("members").select("*").eq("enabled", true).order("full_name"),
@@ -66,7 +66,21 @@ export default async function AsuntosPage({
         .select("id, name, document_number, document_dv")
         .is("deleted_at", null)
         .order("name"),
+      supabase
+        .from("matters")
+        .select("court_name")
+        .not("court_name", "is", null)
+        .is("deleted_at", null)
+        .limit(200),
     ]);
+
+  const courtSuggestions = [
+    ...new Set(
+      (courts ?? [])
+        .map((c) => (c.court_name as string | null)?.trim())
+        .filter((x): x is string => Boolean(x)),
+    ),
+  ];
 
   const clienteFilter = params.cliente?.trim().toLowerCase() ?? "";
 
@@ -118,6 +132,7 @@ export default async function AsuntosPage({
             >[]}
             members={(members ?? []) as Member[]}
             currentMemberId={member.id}
+            courtSuggestions={courtSuggestions}
           />
         ) : (
           <p className="text-xs text-[var(--muted)]">

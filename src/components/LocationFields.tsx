@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { Label } from "@/components/ui/label";
+import { NativeSelect } from "@/components/ui/select";
 import { daneDepartments, daneMunicipalities } from "@/lib/dane";
 
 export function LocationFields({
@@ -10,12 +11,15 @@ export function LocationFields({
   departmentName = "department",
   cityName = "city",
   cityLabel = "Municipio / ciudad",
+  persistDepartment = true,
 }: {
   departmentDefault?: string | null;
   cityDefault?: string | null;
   departmentName?: string;
   cityName?: string;
   cityLabel?: string;
+  /** Si false, el departamento solo filtra municipios (no se envía en el form). */
+  persistDepartment?: boolean;
 }) {
   const departments = useMemo(() => daneDepartments(), []);
   const [department, setDepartment] = useState(departmentDefault ?? "");
@@ -25,10 +29,10 @@ export function LocationFields({
   return (
     <>
       <div className="field">
-        <Label htmlFor={departmentName}>Departamento</Label>
-        <select
-          id={departmentName}
-          name={departmentName}
+        <Label htmlFor={`${departmentName}-ui`}>Departamento</Label>
+        <NativeSelect
+          id={`${departmentName}-ui`}
+          name={persistDepartment ? departmentName : undefined}
           value={department}
           onChange={(e) => {
             setDepartment(e.target.value);
@@ -41,11 +45,11 @@ export function LocationFields({
               {d}
             </option>
           ))}
-        </select>
+        </NativeSelect>
       </div>
       <div className="field">
         <Label htmlFor={cityName}>{cityLabel}</Label>
-        <select
+        <NativeSelect
           id={cityName}
           name={cityName}
           value={city}
@@ -63,7 +67,7 @@ export function LocationFields({
           {city && !municipalities.includes(city) ? (
             <option value={city}>{city} (actual)</option>
           ) : null}
-        </select>
+        </NativeSelect>
       </div>
     </>
   );

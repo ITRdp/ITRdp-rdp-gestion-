@@ -110,14 +110,60 @@ export default async function ClienteDetailPage({
         />
       </header>
 
-      <div className="grid gap-8 lg:grid-cols-2">
-        <section className="grid gap-3">
-          <EditGate title="Datos">
+      <div className="grid items-start gap-8 lg:grid-cols-2">
+        <section className="surface rounded-md p-4">
+          <EditGate
+            title="Datos"
+            preview={
+              <dl className="grid gap-3 text-sm sm:grid-cols-2">
+                <div>
+                  <dt className="hint">Nombre / razón social</dt>
+                  <dd className="font-medium">{client.name}</dd>
+                </div>
+                <div>
+                  <dt className="hint">Nombre comercial</dt>
+                  <dd className="font-medium">
+                    {(client as Client).trade_name || "—"}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="hint">Documento</dt>
+                  <dd className="font-medium">
+                    {formatDocument(
+                      client.document_type,
+                      client.document_number,
+                      client.document_dv,
+                    )}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="hint">Ubicación</dt>
+                  <dd className="font-medium">
+                    {[client.city, client.department]
+                      .filter(Boolean)
+                      .join(", ") || "—"}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="hint">Correo</dt>
+                  <dd className="font-medium">{client.email || "—"}</dd>
+                </div>
+                <div>
+                  <dt className="hint">Celular</dt>
+                  <dd className="font-medium">{client.phone || "—"}</dd>
+                </div>
+                <div className="sm:col-span-2">
+                  <dt className="hint">Dirección</dt>
+                  <dd className="font-medium">{client.address || "—"}</dd>
+                </div>
+              </dl>
+            }
+          >
             <ClientForm client={client as Client} mode="edit" />
           </EditGate>
         </section>
 
-        <div className="grid gap-8">
+        <div className="grid gap-6 self-start">
           <section>
             <h2 className="font-display mb-3 text-xl text-[var(--wine-900)]">
               Contactos

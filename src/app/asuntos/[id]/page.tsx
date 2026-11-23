@@ -10,7 +10,7 @@ import { EmptyState } from "@/components/EmptyState";
 import { EditGate } from "@/components/EditGate";
 import { EventForm } from "@/components/EventForm";
 import { MatterEditForm } from "@/components/MatterEditForm";
-import { parseCounterparts } from "@/components/CounterpartsField";
+import { formatCounterpartsDisplay } from "@/lib/counterparts";
 import { SemaforoBadge } from "@/components/SemaforoBadge";
 import { TaskForm } from "@/components/TaskForm";
 import {
@@ -78,6 +78,7 @@ export default async function MatterDetailPage({
     { data: activityLog },
     { data: documents },
     { data: timeEntries },
+    { data: courts },
   ] = await Promise.all([
     supabase
       .from("matters")
@@ -154,7 +155,21 @@ export default async function MatterDetailPage({
       .select("*")
       .eq("matter_id", id)
       .order("started_at", { ascending: false }),
+    supabase
+      .from("matters")
+      .select("court_name")
+      .not("court_name", "is", null)
+      .is("deleted_at", null)
+      .limit(200),
   ]);
+
+  const courtSuggestions = [
+    ...new Set(
+      (courts ?? [])
+        .map((c) => (c.court_name as string | null)?.trim())
+        .filter((x): x is string => Boolean(x)),
+    ),
+  ];
 
   const holidaysSet = holidaySet(holidays ?? []);
   const today = todayISO();
@@ -266,13 +281,7 @@ export default async function MatterDetailPage({
             <div className="surface rounded-md p-3">
               <dt className="hint">Contraparte(s)</dt>
               <dd className="font-medium">
-                {parseCounterparts(matter.counterparts).length
-                  ? parseCounterparts(matter.counterparts)
-                      .map((c) =>
-                        c.document ? `${c.name} (${c.document})` : c.name,
-                      )
-                      .join(" · ")
-                  : "—"}
+                {formatCounterpartsDisplay(matter.counterparts)}
               </dd>
             </div>
             <div className="surface rounded-md p-3">
@@ -324,11 +333,20 @@ export default async function MatterDetailPage({
           </div>
 
           <div className="lg:col-span-2 grid gap-3">
-            <EditGate title="Datos del asunto">
+            <EditGate
+              title="Datos del asunto"
+              preview={
+                <p className="text-sm text-[var(--muted)]">
+                  Usa <strong>Editar</strong> para cambiar tipo, etapa, equipo,
+                  despacho y montos.
+                </p>
+              }
+            >
               <MatterEditForm
                 matter={matter as Matter}
                 clients={(clients ?? []) as Pick<Client, "id" | "name">[]}
                 members={(members ?? []) as Member[]}
+                courtSuggestions={courtSuggestions}
               />
             </EditGate>
             {member.role === "admin" ? (
@@ -383,7 +401,11 @@ export default async function MatterDetailPage({
             <h2 className="font-display mb-3 text-xl text-[var(--wine-900)]">
               Línea de tiempo
             </h2>
-            <ActivityTimeline entries={activity} actorNames={actorNames} />
+            <ActivityTimeline
+              entries={activity}
+              actorNames={actorNames}
+              matterType={matter.matter_type}
+            />
           </section>
         </TabsContent>
 
