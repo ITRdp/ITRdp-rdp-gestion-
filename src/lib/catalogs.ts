@@ -32,37 +32,109 @@ export const MATTER_AREAS = [
   { value: "otro", label: "Otro" },
 ] as const;
 
-/** Tipo de trámite / procedimiento (define etapas). */
+/** Tipo de trámite / procedimiento (define etapas). Liquidación es etapa de insolvencia. */
 export const MATTER_PROCEDURE_TYPES = [
   { value: "judicial", label: "Judicial" },
   { value: "arbitral", label: "Arbitral" },
   { value: "administrativo", label: "Administrativo" },
-  { value: "insolvencia_liquidacion", label: "Insolvencia y liquidación" },
+  { value: "insolvencia", label: "Insolvencia" },
   { value: "extrajudicial", label: "Extrajudicial / negociación" },
   { value: "contractual", label: "Contractual" },
   { value: "consultoria", label: "Consultoría" },
 ] as const;
 
-/** @deprecated Usar MATTER_PROCEDURE_TYPES; se mantiene alias para UI legacy. */
+/** Etapas por tipo — espejo del seed SQL matter_stage_defs. */
+export const MATTER_STAGES_BY_TYPE: Record<
+  string,
+  { value: string; label: string }[]
+> = {
+  judicial: [
+    { value: "ingreso", label: "Ingreso" },
+    { value: "demanda", label: "Demanda / radicación" },
+    { value: "contestacion", label: "Contestación" },
+    { value: "pruebas", label: "Pruebas" },
+    { value: "audiencia", label: "Audiencia" },
+    { value: "alegatos", label: "Alegatos" },
+    { value: "fallo", label: "Fallo" },
+    { value: "ejecucion", label: "Ejecución" },
+    { value: "gestiones_adicionales", label: "Gestiones adicionales" },
+    { value: "cierre", label: "Cierre" },
+  ],
+  arbitral: [
+    { value: "ingreso", label: "Ingreso" },
+    { value: "demanda", label: "Demanda arbitral" },
+    { value: "contestacion", label: "Contestación" },
+    { value: "pruebas", label: "Pruebas" },
+    { value: "audiencia", label: "Audiencia" },
+    { value: "alegatos", label: "Alegatos" },
+    { value: "laudo", label: "Laudo" },
+    { value: "ejecucion", label: "Ejecución" },
+    { value: "gestiones_adicionales", label: "Gestiones adicionales" },
+    { value: "cierre", label: "Cierre" },
+  ],
+  administrativo: [
+    { value: "ingreso", label: "Ingreso" },
+    { value: "peticion", label: "Petición / recurso" },
+    { value: "pruebas", label: "Pruebas" },
+    { value: "audiencia", label: "Audiencia" },
+    { value: "decision", label: "Decisión" },
+    { value: "ejecucion", label: "Ejecución" },
+    { value: "gestiones_adicionales", label: "Gestiones adicionales" },
+    { value: "cierre", label: "Cierre" },
+  ],
+  insolvencia: [
+    { value: "ingreso", label: "Ingreso" },
+    { value: "analisis", label: "Análisis" },
+    { value: "reorganizacion", label: "Reorganización" },
+    { value: "liquidacion", label: "Liquidación" },
+    { value: "gestiones_adicionales", label: "Gestiones adicionales" },
+    { value: "cierre", label: "Cierre" },
+  ],
+  extrajudicial: [
+    { value: "ingreso", label: "Ingreso" },
+    { value: "negociacion", label: "Negociación" },
+    { value: "acuerdo", label: "Acuerdo" },
+    { value: "gestiones_adicionales", label: "Gestiones adicionales" },
+    { value: "cierre", label: "Cierre" },
+  ],
+  contractual: [
+    { value: "ingreso", label: "Ingreso" },
+    { value: "redaccion", label: "Redacción" },
+    { value: "revision", label: "Revisión" },
+    { value: "firma", label: "Firma" },
+    { value: "gestiones_adicionales", label: "Gestiones adicionales" },
+    { value: "cierre", label: "Cierre" },
+  ],
+  consultoria: [
+    { value: "ingreso", label: "Ingreso" },
+    { value: "analisis", label: "Análisis" },
+    { value: "entrega", label: "Entrega" },
+    { value: "gestiones_adicionales", label: "Gestiones adicionales" },
+    { value: "cierre", label: "Cierre" },
+  ],
+};
+
+/** Unión de claves de etapa (labels; preferir stagesForType). */
+export const MATTER_STAGES = Object.values(MATTER_STAGES_BY_TYPE)
+  .flat()
+  .filter(
+    (s, i, arr) => arr.findIndex((x) => x.value === s.value) === i,
+  ) as { value: string; label: string }[];
+
+export function stagesForType(matterType: string | null | undefined) {
+  if (!matterType) return MATTER_STAGES_BY_TYPE.consultoria;
+  return (
+    MATTER_STAGES_BY_TYPE[matterType] ?? MATTER_STAGES_BY_TYPE.consultoria
+  );
+}
+
+/** @deprecated Usar MATTER_PROCEDURE_TYPES. */
 export const MATTER_TYPES_BY_AREA: Record<
   string,
   { value: string; label: string }[]
 > = Object.fromEntries(
   MATTER_AREAS.map((a) => [a.value, [...MATTER_PROCEDURE_TYPES]]),
 );
-
-/** Etapas globales (fallback; la fuente de verdad es matter_stage_defs). */
-export const MATTER_STAGES = [
-  { value: "ingreso", label: "Ingreso" },
-  { value: "analisis", label: "Análisis" },
-  { value: "actuacion", label: "Actuación" },
-  { value: "audiencia", label: "Audiencia" },
-  { value: "alegatos", label: "Alegatos" },
-  { value: "fallo", label: "Fallo" },
-  { value: "ejecucion", label: "Ejecución" },
-  { value: "gestiones_adicionales", label: "Gestiones adicionales" },
-  { value: "cierre", label: "Cierre" },
-] as const;
 
 export const FEE_MODALITIES = [
   { value: "fijo", label: "Honorarios fijos" },

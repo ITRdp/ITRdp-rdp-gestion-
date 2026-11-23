@@ -19,8 +19,8 @@ import {
   MATTER_AREAS,
   MATTER_PRIORITIES,
   MATTER_PROCEDURE_TYPES,
-  MATTER_STAGES,
   MATTER_STATUSES,
+  stagesForType,
 } from "@/lib/catalogs";
 import type { Client, Member } from "@/lib/types";
 
@@ -39,15 +39,24 @@ export function NewMatterDrawer({
 }) {
   const [open, setOpen] = useState(false);
   const [area, setArea] = useState("empresa");
+  const [matterType, setMatterType] = useState("judicial");
+  const [stage, setStage] = useState("ingreso");
   const [teamIds, setTeamIds] = useState<string[]>([]);
   const [clientMode, setClientMode] = useState<"existing" | "new">("existing");
   const [state, formAction, pending] = useActionState(createMatterAction, initial);
 
   const types = useMemo(() => [...MATTER_PROCEDURE_TYPES], []);
+  const stages = stagesForType(matterType);
 
   useEffect(() => {
     if (state.error) toast.error(state.error);
   }, [state]);
+
+  useEffect(() => {
+    if (!stages.some((s) => s.value === stage)) {
+      setStage(stages[0]?.value ?? "ingreso");
+    }
+  }, [matterType, stages, stage]);
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
@@ -163,7 +172,8 @@ export function NewMatterDrawer({
                 <select
                   id="matter_type"
                   name="matter_type"
-                  defaultValue="judicial"
+                  value={matterType}
+                  onChange={(e) => setMatterType(e.target.value)}
                 >
                   {types.map((t) => (
                     <option key={t.value} value={t.value}>
@@ -174,8 +184,13 @@ export function NewMatterDrawer({
               </div>
               <div className="field">
                 <Label htmlFor="stage">Etapa</Label>
-                <select id="stage" name="stage" defaultValue="ingreso">
-                  {MATTER_STAGES.map((s) => (
+                <select
+                  id="stage"
+                  name="stage"
+                  value={stage}
+                  onChange={(e) => setStage(e.target.value)}
+                >
+                  {stages.map((s) => (
                     <option key={s.value} value={s.value}>
                       {s.label}
                     </option>

@@ -9,7 +9,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { requireMember } from "@/lib/auth";
-import { labelOf, MATTER_STAGES, MATTER_STATUSES, PERSON_TYPES } from "@/lib/catalogs";
+import {
+  labelOf,
+  MATTER_STATUSES,
+  PERSON_TYPES,
+  stagesForType,
+} from "@/lib/catalogs";
 import { formatDocument } from "@/lib/nit";
 import { createClient } from "@/lib/supabase/server";
 import type { Client, Member } from "@/lib/types";
@@ -44,7 +49,7 @@ export default async function ClienteDetailPage({
     supabase
       .from("matters")
       .select(
-        "id, code, title, status, stage, priority, procedural_deadline, responsible:members!matters_responsible_lawyer_id_fkey(full_name)",
+        "id, code, title, status, stage, matter_type, priority, procedural_deadline, responsible:members!matters_responsible_lawyer_id_fkey(full_name)",
       )
       .eq("client_id", id)
       .is("deleted_at", null)
@@ -196,8 +201,11 @@ export default async function ClienteDetailPage({
                         </p>
                         <p className="mt-1 text-xs text-[var(--muted)]">
                           {labelOf(MATTER_STATUSES, m.status)} ·{" "}
-                          {labelOf(MATTER_STAGES, m.stage)} ·{" "}
-                          {responsible?.full_name ?? "—"}
+                          {labelOf(
+                            stagesForType(m.matter_type as string | null),
+                            m.stage,
+                          )}{" "}
+                          · {responsible?.full_name ?? "—"}
                         </p>
                       </Link>
                     </li>

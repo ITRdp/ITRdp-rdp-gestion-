@@ -10,8 +10,8 @@ import {
   MATTER_AREAS,
   MATTER_PRIORITIES,
   MATTER_PROCEDURE_TYPES,
-  MATTER_STAGES,
   MATTER_STATUSES,
+  stagesForType,
 } from "@/lib/catalogs";
 import type { Client, Matter, Member } from "@/lib/types";
 
@@ -28,12 +28,21 @@ export function MatterEditForm({
 }) {
   const [state, formAction, pending] = useActionState(updateMatterAction, initial);
   const [area, setArea] = useState(matter.area);
+  const [matterType, setMatterType] = useState(matter.matter_type);
+  const [stage, setStage] = useState(matter.stage);
   const types = useMemo(() => [...MATTER_PROCEDURE_TYPES], []);
+  const stages = stagesForType(matterType);
 
   useEffect(() => {
     if (state.success) toast.success(state.success);
     if (state.error) toast.error(state.error);
   }, [state]);
+
+  useEffect(() => {
+    if (!stages.some((s) => s.value === stage)) {
+      setStage(stages[0]?.value ?? "ingreso");
+    }
+  }, [matterType, stages, stage]);
 
   return (
     <form action={formAction} className="surface grid gap-4 rounded-md p-5">
@@ -84,7 +93,8 @@ export function MatterEditForm({
           <select
             id="matter_type"
             name="matter_type"
-            defaultValue={matter.matter_type}
+            value={matterType}
+            onChange={(e) => setMatterType(e.target.value)}
           >
             {types.map((t) => (
               <option key={t.value} value={t.value}>
@@ -95,8 +105,13 @@ export function MatterEditForm({
         </div>
         <div className="field">
           <Label htmlFor="stage">Etapa</Label>
-          <select id="stage" name="stage" defaultValue={matter.stage}>
-            {MATTER_STAGES.map((s) => (
+          <select
+            id="stage"
+            name="stage"
+            value={stage}
+            onChange={(e) => setStage(e.target.value)}
+          >
+            {stages.map((s) => (
               <option key={s.value} value={s.value}>
                 {s.label}
               </option>

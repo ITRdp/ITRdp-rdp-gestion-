@@ -11,22 +11,14 @@ export type MatterArea =
   | "tributario"
   | "societario"
   | "otro";
-export type MatterStage =
-  | "ingreso"
-  | "analisis"
-  | "actuacion"
-  | "audiencia"
-  | "alegatos"
-  | "fallo"
-  | "ejecucion"
-  | "gestiones_adicionales"
-  | "cierre";
+/** Clave de etapa (validada por FK a matter_stage_defs). */
+export type MatterStage = string;
 
 export type MatterProcedureType =
   | "judicial"
   | "arbitral"
   | "administrativo"
-  | "insolvencia_liquidacion"
+  | "insolvencia"
   | "extrajudicial"
   | "contractual"
   | "consultoria";

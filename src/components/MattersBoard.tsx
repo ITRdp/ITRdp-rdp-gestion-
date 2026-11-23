@@ -12,6 +12,7 @@ import {
   MATTER_STAGES,
   MATTER_STATUSES,
   labelOf,
+  stagesForType,
 } from "@/lib/catalogs";
 import { formatDate } from "@/lib/format";
 import { formatCOP } from "@/lib/money";
@@ -23,6 +24,7 @@ export type MatterRow = {
   title: string;
   status: MatterStatus;
   stage: MatterStage;
+  matter_type: string;
   priority: string;
   area: string;
   procedural_deadline: string | null;
@@ -186,7 +188,8 @@ export function MattersBoard({ matters }: { matters: MatterRow[] }) {
                           const next = e.target.value as MatterStage;
                           e.target.value = "";
                           if (!next || next === m.stage) return;
-                          const label = labelOf(MATTER_STAGES, next);
+                          const typeStages = stagesForType(m.matter_type);
+                          const label = labelOf(typeStages, next);
                           if (
                             !window.confirm(
                               `¿Mover el asunto a la etapa «${label}»?`,
@@ -203,13 +206,13 @@ export function MattersBoard({ matters }: { matters: MatterRow[] }) {
                         }}
                       >
                         <option value="">Cambiar etapa…</option>
-                        {MATTER_STAGES.filter((s) => s.value !== m.stage).map(
-                          (s) => (
+                        {stagesForType(m.matter_type)
+                          .filter((s) => s.value !== m.stage)
+                          .map((s) => (
                             <option key={s.value} value={s.value}>
                               {s.label}
                             </option>
-                          ),
-                        )}
+                          ))}
                       </select>
                     </li>
                   ))}
@@ -254,7 +257,9 @@ export function MattersBoard({ matters }: { matters: MatterRow[] }) {
                   <td className="px-3 py-2 text-[var(--muted)]">{m.clientName}</td>
                   <td className="px-3 py-2">{labelOf(MATTER_AREAS, m.area)}</td>
                   <td className="px-3 py-2">
-                    <span className="badge">{labelOf(MATTER_STAGES, m.stage)}</span>
+                    <span className="badge">
+                      {labelOf(stagesForType(m.matter_type), m.stage)}
+                    </span>
                   </td>
                   <td className="px-3 py-2">
                     <span className="badge capitalize">

@@ -25,8 +25,9 @@ import {
   labelOf,
   MATTER_AREAS,
   MATTER_PRIORITIES,
-  MATTER_STAGES,
+  MATTER_PROCEDURE_TYPES,
   MATTER_STATUSES,
+  stagesForType,
   TASK_PRIORITIES,
 } from "@/lib/catalogs";
 import { formatDate, formatDateTime, todayISO } from "@/lib/format";
@@ -203,7 +204,10 @@ export default async function MatterDetailPage({
             {labelOf(MATTER_STATUSES, matter.status)}
           </span>
           <span className="badge">
-            {labelOf(MATTER_STAGES, matter.stage)}
+            {labelOf(stagesForType(matter.matter_type), matter.stage)}
+          </span>
+          <span className="badge">
+            {labelOf(MATTER_PROCEDURE_TYPES, matter.matter_type)}
           </span>
           <span className="badge badge-gold capitalize">
             {labelOf(MATTER_PRIORITIES, matter.priority)}
