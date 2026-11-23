@@ -40,7 +40,7 @@ export function NewMatterDrawer({
   const [open, setOpen] = useState(false);
   const [area, setArea] = useState("empresa");
   const [matterType, setMatterType] = useState("judicial");
-  const [stage, setStage] = useState("ingreso");
+  const [stage, setStage] = useState("estudio");
   const [teamIds, setTeamIds] = useState<string[]>([]);
   const [clientMode, setClientMode] = useState<"existing" | "new">("existing");
   const [state, formAction, pending] = useActionState(createMatterAction, initial);
@@ -54,7 +54,7 @@ export function NewMatterDrawer({
 
   useEffect(() => {
     if (!stages.some((s) => s.value === stage)) {
-      setStage(stages[0]?.value ?? "ingreso");
+      setStage(stages[0]?.value ?? "estudio");
     }
   }, [matterType, stages, stage]);
 

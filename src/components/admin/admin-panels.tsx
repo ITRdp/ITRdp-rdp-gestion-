@@ -333,7 +333,7 @@ export function StagesAdmin({ stages }: { stages: MatterStageDef[] }) {
       {!stages.length ? (
         <EmptyState
           title="Sin etapas en base de datos"
-          description="Aplica la migración 20261123140000_prelanzamiento_stages.sql."
+          description="Aplica 20261123140000_prelanzamiento_stages.sql y luego 20261123150000_etapas_acordadas.sql."
         />
       ) : (
         <div className="grid gap-4 lg:grid-cols-2">

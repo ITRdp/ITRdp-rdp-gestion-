@@ -40,7 +40,7 @@ export function MatterEditForm({
 
   useEffect(() => {
     if (!stages.some((s) => s.value === stage)) {
-      setStage(stages[0]?.value ?? "ingreso");
+      setStage(stages[0]?.value ?? "estudio");
     }
   }, [matterType, stages, stage]);
 

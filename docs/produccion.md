@@ -23,6 +23,7 @@ Lista actual (incluye fix festivos/áreas y etapas prelanzamiento):
 5. `20261123040000_fase5_admin_rls_notifications.sql`
 6. `20261123120000_fix_festivos_areas_protect.sql`
 7. `20261123140000_prelanzamiento_stages.sql`
+8. `20261123150000_etapas_acordadas.sql` — Mapa exacto de etapas (upsert + disable extras + remap)
 
 4. Crea el bucket privado `matter-documents` si la migración no lo hizo.
 5. Authentication → URL Configuration:
