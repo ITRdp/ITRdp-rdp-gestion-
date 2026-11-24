@@ -1,0 +1,100 @@
+"use client";
+
+import { useActionState, useEffect } from "react";
+import { toast } from "sonner";
+import { createEventAction, type FormState } from "@/app/actions/events";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { DateTimePicker } from "@/components/ui/date-picker";
+import { FormSelect } from "@/components/ui/select";
+import { EVENT_TYPES } from "@/lib/catalogs";
+
+const initial: FormState = {};
+
+export function EventForm({
+  matters,
+  defaultMatterId,
+  defaultStartsAt,
+}: {
+  matters: { id: string; code: string; title: string }[];
+  defaultMatterId?: string;
+  defaultStartsAt?: string;
+}) {
+  const [state, formAction, pending] = useActionState(createEventAction, initial);
+
+  useEffect(() => {
+    if (state.success) toast.success(state.success);
+    if (state.error) toast.error(state.error);
+  }, [state]);
+
+  return (
+    <form action={formAction} className="surface grid gap-3 rounded-md p-4">
+      <h2 className="font-display text-lg text-[var(--wine-900)]">Nuevo evento</h2>
+      {state.error ? (
+        <div className="alert" role="alert">
+          {state.error}
+        </div>
+      ) : null}
+      <div className="field">
+        <Label htmlFor="title">Título</Label>
+        <Input id="title" name="title" required placeholder="Audiencia / reunión…" />
+      </div>
+      <div className="grid gap-3 sm:grid-cols-2">
+        <div className="field">
+          <Label htmlFor="event_type">Tipo</Label>
+          <FormSelect
+            id="event_type"
+            name="event_type"
+            defaultValue="audiencia"
+            options={EVENT_TYPES.map((t) => ({
+              value: t.value,
+              label: t.label,
+            }))}
+          />
+        </div>
+        <div className="field">
+          <Label htmlFor="matter_id">Asunto (opcional)</Label>
+          <FormSelect
+            id="matter_id"
+            name="matter_id"
+            defaultValue={defaultMatterId ?? ""}
+            placeholder="Sin vincular"
+            options={matters.map((m) => ({
+              value: m.id,
+              label: `${m.code} · ${m.title}`,
+            }))}
+          />
+        </div>
+        <div className="field">
+          <Label htmlFor="starts_at">Inicio</Label>
+          <DateTimePicker
+            id="starts_at"
+            name="starts_at"
+            required
+            defaultValue={defaultStartsAt}
+          />
+        </div>
+        <div className="field">
+          <Label htmlFor="ends_at">Fin (opcional)</Label>
+          <DateTimePicker id="ends_at" name="ends_at" />
+        </div>
+        <div className="field sm:col-span-2">
+          <Label htmlFor="location">Lugar</Label>
+          <Input id="location" name="location" placeholder="Juzgado / Teams / oficina" />
+        </div>
+      </div>
+      <label className="flex items-center gap-2 text-sm text-[var(--muted)]">
+        <input type="checkbox" name="all_day" />
+        Todo el día
+      </label>
+      <div className="field">
+        <Label htmlFor="description">Notas</Label>
+        <textarea id="description" name="description" />
+      </div>
+      <Button type="submit" disabled={pending} className="w-fit">
+        {pending ? "Guardando…" : "Crear evento"}
+      </Button>
+    </form>
+  );
+}
