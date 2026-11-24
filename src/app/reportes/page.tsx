@@ -4,6 +4,7 @@ import { EmptyState } from "@/components/EmptyState";
 import { Button } from "@/components/ui/button";
 import { requireMember } from "@/lib/auth";
 import { activityKindLabel } from "@/lib/activity-labels";
+import { humanizeActivitySummary } from "@/lib/stage-labels";
 import { formatDate, formatDateTime, todayISO } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
 
@@ -240,7 +241,9 @@ export default async function ReportesPage() {
                     key={a.id}
                     className="rounded-md border border-[var(--line)] bg-white/60 px-3 py-2 text-sm"
                   >
-                    <p className="text-[var(--ink)]">{a.summary}</p>
+                    <p className="text-[var(--ink)]">
+                      {humanizeActivitySummary(a.summary)}
+                    </p>
                     <p className="text-xs text-[var(--muted)]">
                       {matter?.code && a.matter_id ? (
                         <>

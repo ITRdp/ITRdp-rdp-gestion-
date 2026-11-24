@@ -7,7 +7,10 @@ import { CompleteTaskButton } from "@/components/CompleteTaskButton";
 import { ConfirmArchiveButton } from "@/components/ConfirmArchiveButton";
 import { DocumentsPanel } from "@/components/documents/documents-panel";
 import { EmptyState } from "@/components/EmptyState";
+import { EditGate } from "@/components/EditGate";
+import { EventForm } from "@/components/EventForm";
 import { MatterEditForm } from "@/components/MatterEditForm";
+import { formatCounterpartsDisplay } from "@/lib/counterparts";
 import { SemaforoBadge } from "@/components/SemaforoBadge";
 import { TaskForm } from "@/components/TaskForm";
 import {
@@ -22,6 +25,7 @@ import { requireMember } from "@/lib/auth";
 import { holidaySet } from "@/lib/business-days";
 import {
   EVENT_TYPES,
+  FEE_MODALITIES,
   labelOf,
   MATTER_AREAS,
   MATTER_PRIORITIES,
@@ -74,6 +78,7 @@ export default async function MatterDetailPage({
     { data: activityLog },
     { data: documents },
     { data: timeEntries },
+    { data: courts },
   ] = await Promise.all([
     supabase
       .from("matters")
@@ -150,7 +155,21 @@ export default async function MatterDetailPage({
       .select("*")
       .eq("matter_id", id)
       .order("started_at", { ascending: false }),
+    supabase
+      .from("matters")
+      .select("court_name")
+      .not("court_name", "is", null)
+      .is("deleted_at", null)
+      .limit(200),
   ]);
+
+  const courtSuggestions = [
+    ...new Set(
+      (courts ?? [])
+        .map((c) => (c.court_name as string | null)?.trim())
+        .filter((x): x is string => Boolean(x)),
+    ),
+  ];
 
   const holidaysSet = holidaySet(holidays ?? []);
   const today = todayISO();
@@ -261,7 +280,15 @@ export default async function MatterDetailPage({
             </div>
             <div className="surface rounded-md p-3">
               <dt className="hint">Contraparte(s)</dt>
-              <dd className="font-medium">{matter.counterparts || "—"}</dd>
+              <dd className="font-medium">
+                {formatCounterpartsDisplay(matter.counterparts)}
+              </dd>
+            </div>
+            <div className="surface rounded-md p-3">
+              <dt className="hint">Modalidad de honorarios</dt>
+              <dd className="font-medium">
+                {labelOf(FEE_MODALITIES, matter.fee_modality) || "—"}
+              </dd>
             </div>
             <div className="surface rounded-md p-3">
               <dt className="hint">Radicado</dt>
@@ -305,15 +332,23 @@ export default async function MatterDetailPage({
             )}
           </div>
 
-          <div className="lg:col-span-2">
-            <h2 className="font-display mb-3 text-lg text-[var(--wine-900)]">
-              Editar asunto
-            </h2>
-            <MatterEditForm
-              matter={matter as Matter}
-              clients={(clients ?? []) as Pick<Client, "id" | "name">[]}
-              members={(members ?? []) as Member[]}
-            />
+          <div className="lg:col-span-2 grid gap-3">
+            <EditGate
+              title="Datos del asunto"
+              preview={
+                <p className="text-sm text-[var(--muted)]">
+                  Usa <strong>Editar</strong> para cambiar tipo, etapa, equipo,
+                  despacho y montos.
+                </p>
+              }
+            >
+              <MatterEditForm
+                matter={matter as Matter}
+                clients={(clients ?? []) as Pick<Client, "id" | "name">[]}
+                members={(members ?? []) as Member[]}
+                courtSuggestions={courtSuggestions}
+              />
+            </EditGate>
             {member.role === "admin" ? (
               <ConfirmArchiveButton matterId={matter.id} />
             ) : null}
@@ -366,7 +401,11 @@ export default async function MatterDetailPage({
             <h2 className="font-display mb-3 text-xl text-[var(--wine-900)]">
               Línea de tiempo
             </h2>
-            <ActivityTimeline entries={activity} actorNames={actorNames} />
+            <ActivityTimeline
+              entries={activity}
+              actorNames={actorNames}
+              matterType={matter.matter_type}
+            />
           </section>
         </TabsContent>
 
@@ -467,32 +506,49 @@ export default async function MatterDetailPage({
         </TabsContent>
 
         <TabsContent value="agenda">
-          {!matterEvents?.length ? (
-            <EmptyState
-              title="Sin eventos en este asunto"
-              description="Crea audiencias o reuniones desde Agenda y vincúlalas a este asunto."
+          <div className="grid gap-6 lg:grid-cols-2">
+            <div>
+              {!matterEvents?.length ? (
+                <EmptyState
+                  title="Sin eventos en este asunto"
+                  description="Crea una audiencia o reunión aquí mismo."
+                />
+              ) : (
+                <ul className="grid gap-2">
+                  {matterEvents.map((e) => (
+                    <li key={e.id} className="surface rounded-md p-3 text-sm">
+                      <span className="badge mr-2">
+                        {labelOf(EVENT_TYPES, e.event_type)}
+                      </span>
+                      <span className="font-medium">{e.title}</span>
+                      <p className="mt-1 text-[var(--muted)]">
+                        {formatDateTime(e.starts_at)}
+                        {e.location ? ` · ${e.location}` : ""}
+                      </p>
+                    </li>
+                  ))}
+                </ul>
+              )}
+              <p className="mt-4">
+                <Link
+                  href="/agenda"
+                  className="text-sm text-[var(--wine-700)] underline-offset-2 hover:underline"
+                >
+                  Abrir Agenda completa
+                </Link>
+              </p>
+            </div>
+            <EventForm
+              matters={[
+                {
+                  id: matter.id,
+                  code: matter.code,
+                  title: matter.title,
+                },
+              ]}
+              defaultMatterId={matter.id}
             />
-          ) : (
-            <ul className="grid gap-2">
-              {matterEvents.map((e) => (
-                <li key={e.id} className="surface rounded-md p-3 text-sm">
-                  <span className="badge mr-2">
-                    {labelOf(EVENT_TYPES, e.event_type)}
-                  </span>
-                  <span className="font-medium">{e.title}</span>
-                  <p className="mt-1 text-[var(--muted)]">
-                    {formatDateTime(e.starts_at)}
-                    {e.location ? ` · ${e.location}` : ""}
-                  </p>
-                </li>
-              ))}
-            </ul>
-          )}
-          <p className="mt-4">
-            <Link href="/agenda" className="text-sm text-[var(--gold-500)] hover:underline">
-              Abrir Agenda completa
-            </Link>
-          </p>
+          </div>
         </TabsContent>
         <TabsContent value="documentos">
           <DocumentsPanel matterId={matter.id} documents={docs} />

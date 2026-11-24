@@ -6,7 +6,13 @@ import { updateMatterAction, type FormState } from "@/app/actions/matters";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { CounterpartsField } from "@/components/CounterpartsField";
+import { CourtSuggest } from "@/components/CourtSuggest";
+import { LocationFields } from "@/components/LocationFields";
+import { DatePicker } from "@/components/ui/date-picker";
+import { FormSelect } from "@/components/ui/select";
 import {
+  FEE_MODALITIES,
   MATTER_AREAS,
   MATTER_PRIORITIES,
   MATTER_PROCEDURE_TYPES,
@@ -21,10 +27,12 @@ export function MatterEditForm({
   matter,
   clients,
   members,
+  courtSuggestions = [],
 }: {
   matter: Matter;
   clients: Pick<Client, "id" | "name">[];
   members: Member[];
+  courtSuggestions?: string[];
 }) {
   const [state, formAction, pending] = useActionState(updateMatterAction, initial);
   const [area, setArea] = useState(matter.area);
@@ -60,105 +68,81 @@ export function MatterEditForm({
         </div>
         <div className="field sm:col-span-2">
           <Label htmlFor="client_id">Cliente</Label>
-          <select
+          <FormSelect
             id="client_id"
             name="client_id"
             required
             defaultValue={matter.client_id}
-          >
-            {clients.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.name}
-              </option>
-            ))}
-          </select>
+            options={clients.map((c) => ({ value: c.id, label: c.name }))}
+          />
         </div>
         <div className="field">
           <Label htmlFor="area">Área</Label>
-          <select
+          <FormSelect
             id="area"
             name="area"
             value={area}
-            onChange={(e) => setArea(e.target.value as typeof area)}
-          >
-            {MATTER_AREAS.map((a) => (
-              <option key={a.value} value={a.value}>
-                {a.label}
-              </option>
-            ))}
-          </select>
+            onValueChange={(v) => setArea(v as typeof area)}
+            options={MATTER_AREAS.map((a) => ({ value: a.value, label: a.label }))}
+          />
         </div>
         <div className="field">
           <Label htmlFor="matter_type">Tipo</Label>
-          <select
+          <FormSelect
             id="matter_type"
             name="matter_type"
             value={matterType}
-            onChange={(e) => setMatterType(e.target.value)}
-          >
-            {types.map((t) => (
-              <option key={t.value} value={t.value}>
-                {t.label}
-              </option>
-            ))}
-          </select>
+            onValueChange={setMatterType}
+            options={types.map((t) => ({ value: t.value, label: t.label }))}
+          />
         </div>
         <div className="field">
           <Label htmlFor="stage">Etapa</Label>
-          <select
+          <FormSelect
             id="stage"
             name="stage"
             value={stage}
-            onChange={(e) => setStage(e.target.value)}
-          >
-            {stages.map((s) => (
-              <option key={s.value} value={s.value}>
-                {s.label}
-              </option>
-            ))}
-          </select>
+            onValueChange={setStage}
+            options={stages.map((s) => ({ value: s.value, label: s.label }))}
+          />
         </div>
         <div className="field">
           <Label htmlFor="status">Estado</Label>
-          <select id="status" name="status" defaultValue={matter.status}>
-            {MATTER_STATUSES.map((s) => (
-              <option key={s.value} value={s.value}>
-                {s.label}
-              </option>
-            ))}
-          </select>
+          <FormSelect
+            id="status"
+            name="status"
+            defaultValue={matter.status}
+            options={MATTER_STATUSES.map((s) => ({ value: s.value, label: s.label }))}
+          />
         </div>
         <div className="field">
           <Label htmlFor="priority">Prioridad</Label>
-          <select id="priority" name="priority" defaultValue={matter.priority}>
-            {MATTER_PRIORITIES.map((p) => (
-              <option key={p.value} value={p.value}>
-                {p.label}
-              </option>
-            ))}
-          </select>
+          <FormSelect
+            id="priority"
+            name="priority"
+            defaultValue={matter.priority}
+            options={MATTER_PRIORITIES.map((p) => ({ value: p.value, label: p.label }))}
+          />
         </div>
         <div className="field">
           <Label htmlFor="responsible_lawyer_id">Responsable</Label>
-          <select
+          <FormSelect
             id="responsible_lawyer_id"
             name="responsible_lawyer_id"
             defaultValue={matter.responsible_lawyer_id}
             required
-          >
-            {members.map((m) => (
-              <option key={m.id} value={m.id}>
-                {m.full_name}
-              </option>
-            ))}
-          </select>
+            options={members.map((m) => ({ value: m.id, label: m.full_name }))}
+          />
         </div>
-        <div className="field sm:col-span-2">
-          <Label htmlFor="counterparts">Contraparte(s)</Label>
-          <Input
-            id="counterparts"
-            name="counterparts"
-            defaultValue={matter.counterparts ?? ""}
+        <CounterpartsField defaultValue={matter.counterparts} />
+        <div className="field">
+          <Label htmlFor="fee_modality">Modalidad de honorarios</Label>
+          <FormSelect
+            id="fee_modality"
+            name="fee_modality"
+            defaultValue={matter.fee_modality ?? ""}
+            placeholder="Sin definir"
+            options={FEE_MODALITIES.map((m) => ({ value: m.value, label: m.label }))}
           />
         </div>
         <div className="field">
@@ -170,24 +154,20 @@ export function MatterEditForm({
             defaultValue={matter.radicado ?? ""}
           />
         </div>
-        <div className="field">
-          <Label htmlFor="court_name">Despacho</Label>
-          <Input
-            id="court_name"
-            name="court_name"
-            defaultValue={matter.court_name ?? ""}
-          />
-        </div>
-        <div className="field">
-          <Label htmlFor="city">Ciudad</Label>
-          <Input id="city" name="city" defaultValue={matter.city ?? ""} />
-        </div>
+        <CourtSuggest
+          defaultValue={matter.court_name}
+          suggestions={courtSuggestions}
+        />
+        <LocationFields
+          cityDefault={matter.city}
+          cityLabel="Ciudad"
+          persistDepartment={false}
+        />
         <div className="field">
           <Label htmlFor="procedural_deadline">Venc. procesal</Label>
-          <Input
+          <DatePicker
             id="procedural_deadline"
             name="procedural_deadline"
-            type="date"
             defaultValue={matter.procedural_deadline ?? ""}
           />
         </div>
@@ -209,19 +189,17 @@ export function MatterEditForm({
         </div>
         <div className="field">
           <Label htmlFor="opened_at">Apertura</Label>
-          <Input
+          <DatePicker
             id="opened_at"
             name="opened_at"
-            type="date"
             defaultValue={matter.opened_at ?? ""}
           />
         </div>
         <div className="field">
           <Label htmlFor="closed_at">Cierre</Label>
-          <Input
+          <DatePicker
             id="closed_at"
             name="closed_at"
-            type="date"
             defaultValue={matter.closed_at ?? ""}
           />
         </div>

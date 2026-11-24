@@ -7,6 +7,7 @@ import {
   MembersTable,
   NotificationPrefsForm,
 } from "@/components/admin/admin-panels";
+import { NewMatterDrawer } from "@/components/NewMatterDrawer";
 import { NotificationsBell } from "@/components/notifications/notifications-bell";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type {
@@ -145,10 +146,74 @@ export default async function Fase5PreviewPage({
         <RolesPreview />
       ) : view === "avisos" ? (
         <AvisosPreview />
+      ) : view === "nuevo-asunto" ? (
+        <NuevoAsuntoPreview />
+      ) : view === "miembros-cards" ? (
+        <MiembrosCardsPreview />
       ) : (
         <AdminPreview />
       )}
     </AppShell>
+  );
+}
+
+function NuevoAsuntoPreview() {
+  return (
+    <>
+      <header className="mb-6 flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <p className="text-xs tracking-[0.2em] uppercase text-[var(--gold-400)]">
+            Despacho
+          </p>
+          <h1 className="font-display text-3xl text-[var(--wine-900)]">
+            Asuntos
+          </h1>
+        </div>
+        <NewMatterDrawer
+          clients={[
+            {
+              id: "c1",
+              name: "Constructora Andes S.A.S.",
+              document_number: "900123456",
+              document_dv: "1",
+            },
+            {
+              id: "c2",
+              name: "María Gómez",
+              document_number: "1020304050",
+              document_dv: null,
+            },
+          ]}
+          members={demoMembers}
+          currentMemberId={demoAdmin.id}
+          defaultClientId="c1"
+          courtSuggestions={["Juzgado 12 Civil del Circuito de Bogotá"]}
+          defaultOpen
+        />
+      </header>
+      <p className="text-sm text-[var(--muted)]">
+        Preview del drawer Nuevo asunto (selects shadcn + equipo en una línea).
+      </p>
+    </>
+  );
+}
+
+function MiembrosCardsPreview() {
+  return (
+    <>
+      <header className="mb-6">
+        <p className="text-xs tracking-[0.2em] uppercase text-[var(--gold-400)]">
+          Despacho
+        </p>
+        <h1 className="font-display text-3xl text-[var(--wine-900)]">
+          Administración — Miembros
+        </h1>
+        <p className="mt-1 text-sm text-[var(--muted)]">
+          Vista tarjeta (&lt;1280px): nombre, correo, rol, estado y acciones.
+        </p>
+      </header>
+      <MembersTable members={demoMembers} currentId={demoAdmin.id} />
+    </>
   );
 }
 

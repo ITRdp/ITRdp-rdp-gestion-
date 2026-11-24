@@ -86,6 +86,7 @@ export type Client = {
   document_number: string | null;
   document_dv: string | null;
   legal_name: string | null;
+  trade_name: string | null;
   city: string | null;
   department: string | null;
   address: string | null;
@@ -123,6 +124,7 @@ export type Matter = {
   priority: MatterPriority;
   responsible_lawyer_id: string;
   counterparts: string | null;
+  fee_modality: string | null;
   radicado: string | null;
   court_name: string | null;
   city: string | null;
@@ -217,8 +219,14 @@ export type CalendarEvent = {
 export type NonBusinessDay = {
   id: string;
   day: string;
+  ends_on?: string | null;
   name: string;
-  kind: "festivo_nacional" | "festivo_religioso" | "puente" | "otro";
+  kind:
+    | "festivo_nacional"
+    | "festivo_religioso"
+    | "puente"
+    | "vacancia_judicial"
+    | "otro";
   notes: string | null;
   created_at: string;
 };

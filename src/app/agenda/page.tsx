@@ -9,11 +9,15 @@ import { createClient } from "@/lib/supabase/server";
 export default async function AgendaPage({
   searchParams,
 }: {
-  searchParams: Promise<{ fecha?: string; vista?: string }>;
+  searchParams: Promise<{ fecha?: string; vista?: string; nuevo?: string }>;
 }) {
   const member = await requireMember();
   const params = await searchParams;
   const anchor = (params.fecha || toISODate(new Date())).slice(0, 10);
+  const defaultStartsAt =
+    params.nuevo === "1"
+      ? `${anchor}T09:00`
+      : undefined;
   const supabase = await createClient();
 
   // Rango amplio: mes ± 7 días para mes/semana
@@ -66,7 +70,10 @@ export default async function AgendaPage({
             anchor={anchor}
           />
         </Suspense>
-        <EventForm matters={matters ?? []} />
+        <EventForm
+          matters={matters ?? []}
+          defaultStartsAt={defaultStartsAt}
+        />
       </div>
     </AppShell>
   );

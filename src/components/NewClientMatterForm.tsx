@@ -8,6 +8,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { DatePicker } from "@/components/ui/date-picker";
+import { FormSelect } from "@/components/ui/select";
 import type { Member } from "@/lib/types";
 
 const initial: ClientMatterState = {};
@@ -99,25 +101,22 @@ export function NewClientMatterForm({
           <Label htmlFor="responsible_lawyer_id">
             Abogado responsable del asunto
           </Label>
-          <select
+          <FormSelect
             id="responsible_lawyer_id"
             name="responsible_lawyer_id"
             defaultValue={currentMemberId}
             required
-          >
-            {members.map((m) => (
-              <option key={m.id} value={m.id}>
-                {m.full_name}
-              </option>
-            ))}
-          </select>
+            options={members.map((m) => ({
+              value: m.id,
+              label: m.full_name,
+            }))}
+          />
         </div>
         <div className="field">
           <Label htmlFor="procedural_deadline">Vencimiento procesal</Label>
-          <Input
+          <DatePicker
             id="procedural_deadline"
             name="procedural_deadline"
-            type="date"
           />
           <p className="hint">
             Plazo judicial o administrativo. No es la fecha de seguimiento de

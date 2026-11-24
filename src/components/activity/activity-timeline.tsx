@@ -5,15 +5,18 @@ import {
   actorDisplayName,
   entityLabel,
 } from "@/lib/activity-labels";
+import { humanizeActivitySummary } from "@/lib/stage-labels";
 import { formatDateTime } from "@/lib/format";
 import { EmptyState } from "@/components/EmptyState";
 
 export function ActivityTimeline({
   entries,
   actorNames,
+  matterType,
 }: {
   entries: ActivityLogEntry[];
   actorNames: Record<string, string>;
+  matterType?: string | null;
 }) {
   if (!entries.length) {
     return (
@@ -40,7 +43,9 @@ export function ActivityTimeline({
               {formatDateTime(e.created_at)}
             </time>
           </div>
-          <p className="mt-0.5 text-sm text-[var(--ink)]">{e.summary}</p>
+          <p className="mt-0.5 text-sm text-[var(--ink)]">
+            {humanizeActivitySummary(e.summary, matterType)}
+          </p>
           <p className="mt-1 text-xs text-[var(--muted)]">
             {actorDisplayName(
               e.actor_id ? actorNames[e.actor_id] : null,

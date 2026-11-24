@@ -109,7 +109,19 @@ export function AppShell({
         collapsed ? "w-[4.5rem]" : "w-64",
       )}
     >
-      <div className="pointer-events-none absolute inset-0 brand-texture" aria-hidden />
+      {/* Un solo monograma de fondo, muy sutil (sin textura duplicada). */}
+      <div
+        className="pointer-events-none absolute inset-0 overflow-hidden"
+        aria-hidden
+      >
+        <Image
+          src="/brand/monogram-gold.png"
+          alt=""
+          width={220}
+          height={240}
+          className="absolute -right-6 bottom-8 h-48 w-auto opacity-[0.06]"
+        />
+      </div>
       <div className="relative border-b border-white/10 px-3 py-4">
         <Link href="/" className="flex items-center gap-3">
           <Image

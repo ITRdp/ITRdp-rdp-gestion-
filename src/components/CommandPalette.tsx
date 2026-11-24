@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Briefcase, Users } from "lucide-react";
+import { Briefcase, CalendarDays, Plus, Users } from "lucide-react";
 import {
   CommandDialog,
   CommandEmpty,
@@ -95,13 +95,36 @@ export function CommandPalette({
         onValueChange={setQuery}
       />
       <CommandList>
+        {loading ? (
+          <div className="space-y-2 p-3" aria-live="polite">
+            <p className="text-xs text-[var(--muted)]">Buscando…</p>
+            <div className="skeleton h-8 w-full" />
+            <div className="skeleton h-8 w-4/5" />
+          </div>
+        ) : null}
         <CommandEmpty>
           {loading
-            ? "Buscando…"
+            ? " "
             : query.trim()
               ? "Sin resultados"
-              : "Escribe para buscar asuntos o clientes"}
+              : "Escribe para buscar o elige una acción rápida"}
         </CommandEmpty>
+        {!query.trim() ? (
+          <CommandGroup heading="Acciones rápidas">
+            <CommandItem value="nuevo-asunto" onSelect={() => go("/asuntos")}>
+              <Plus className="text-[var(--wine-700)]" />
+              Nuevo asunto
+            </CommandItem>
+            <CommandItem value="nuevo-cliente" onSelect={() => go("/clientes")}>
+              <Users className="text-[var(--wine-700)]" />
+              Nuevo cliente
+            </CommandItem>
+            <CommandItem value="ir-agenda" onSelect={() => go("/agenda")}>
+              <CalendarDays className="text-[var(--wine-700)]" />
+              Ir a Agenda
+            </CommandItem>
+          </CommandGroup>
+        ) : null}
         {matters.length > 0 && (
           <CommandGroup heading="Asuntos">
             {matters.map((m) => (

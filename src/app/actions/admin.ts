@@ -184,28 +184,51 @@ export async function addNonBusinessDayAction(
   await requireAdmin();
   const supabase = await createClient();
   const day = str(formData, "day");
+  const endsOn = nullStr(formData, "ends_on");
   const name = str(formData, "name");
   const kind = str(formData, "kind") || "festivo_nacional";
+  const notes = nullStr(formData, "notes");
 
   if (!day || !name) return { error: "Fecha y nombre obligatorios." };
+  if (endsOn && endsOn < day) {
+    return { error: "La fecha fin debe ser ≥ a la fecha inicio." };
+  }
 
-  const { error } = await supabase.from("non_business_days").insert({
-    day,
-    name,
+  const days: string[] = [day];
+  if (endsOn && endsOn !== day) {
+    const cur = new Date(`${day}T12:00:00`);
+    const end = new Date(`${endsOn}T12:00:00`);
+    while (cur < end) {
+      cur.setDate(cur.getDate() + 1);
+      days.push(cur.toISOString().slice(0, 10));
+    }
+  }
+
+  const rows = days.map((d, i) => ({
+    day: d,
+    name: days.length > 1 ? `${name} (${i + 1}/${days.length})` : name,
     kind,
-    notes: nullStr(formData, "notes"),
-  });
+    notes,
+    ends_on: endsOn && endsOn !== day ? endsOn : null,
+  }));
+
+  const { error } = await supabase.from("non_business_days").insert(rows);
 
   if (error) {
     return {
       error: error.message.includes("duplicate")
-        ? "Esa fecha ya está registrada."
+        ? "Alguna fecha del rango ya está registrada."
         : error.message,
     };
   }
   revalidatePath("/admin");
   revalidatePath("/agenda");
-  return { success: "Día no hábil agregado." };
+  return {
+    success:
+      days.length > 1
+        ? `Rango no hábil agregado (${days.length} días).`
+        : "Día no hábil agregado.",
+  };
 }
 
 export async function deleteNonBusinessDayAction(
@@ -237,6 +260,75 @@ export async function updateStageDefAction(
   revalidatePath("/admin");
   revalidatePath("/asuntos");
   return { success: "Etapa actualizada." };
+}
+
+export async function reorderStageDefsAction(
+  orderedIds: string[],
+): Promise<FormState> {
+  await requireAdmin();
+  const supabase = await createClient();
+  for (let i = 0; i < orderedIds.length; i++) {
+    const id = orderedIds[i]!;
+    const { error } = await supabase
+      .from("matter_stage_defs")
+      .update({ sort_order: (i + 1) * 10 })
+      .eq("id", id);
+    if (error) return { error: error.message };
+  }
+  revalidatePath("/admin");
+  revalidatePath("/asuntos");
+  return { success: "Orden actualizado." };
+}
+
+export async function addStageDefAction(
+  _prev: FormState,
+  formData: FormData,
+): Promise<FormState> {
+  await requireAdmin();
+  const supabase = await createClient();
+  const matterType = str(formData, "matter_type");
+  const label = str(formData, "label");
+  let stageKey = str(formData, "stage_key");
+  if (!matterType || !label) {
+    return { error: "Tipo y etiqueta son obligatorios." };
+  }
+  if (!stageKey) {
+    stageKey = label
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "_")
+      .replace(/^_|_$/g, "")
+      .slice(0, 48);
+  }
+  if (!stageKey) return { error: "No se pudo generar la clave de etapa." };
+
+  const { data: maxRow } = await supabase
+    .from("matter_stage_defs")
+    .select("sort_order")
+    .eq("matter_type", matterType)
+    .order("sort_order", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  const sortOrder = (maxRow?.sort_order ?? 0) + 10;
+
+  const { error } = await supabase.from("matter_stage_defs").insert({
+    matter_type: matterType,
+    stage_key: stageKey,
+    label,
+    sort_order: sortOrder,
+    enabled: true,
+  });
+  if (error) {
+    return {
+      error: error.message.includes("duplicate")
+        ? "Ya existe esa clave de etapa para el tipo."
+        : error.message,
+    };
+  }
+  revalidatePath("/admin");
+  revalidatePath("/asuntos");
+  return { success: "Etapa agregada." };
 }
 
 export async function updateMyNotificationPrefsAction(

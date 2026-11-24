@@ -10,6 +10,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { LocationFields } from "@/components/LocationFields";
+import { FormSelect } from "@/components/ui/select";
 import { DOCUMENT_TYPES, PERSON_TYPES } from "@/lib/catalogs";
 import { nitCheckDigit } from "@/lib/nit";
 import type { Client } from "@/lib/types";
@@ -53,17 +55,15 @@ export function ClientForm({
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="field">
           <Label htmlFor="person_type">Tipo de persona</Label>
-          <select
+          <FormSelect
             id="person_type"
             name="person_type"
             defaultValue={client?.person_type ?? "juridica"}
-          >
-            {PERSON_TYPES.map((p) => (
-              <option key={p.value} value={p.value}>
-                {p.label}
-              </option>
-            ))}
-          </select>
+            options={PERSON_TYPES.map((p) => ({
+              value: p.value,
+              label: p.label,
+            }))}
+          />
         </div>
         <div className="field">
           <Label htmlFor="name">Nombre / razón social</Label>
@@ -74,30 +74,29 @@ export function ClientForm({
             defaultValue={client?.name ?? ""}
             placeholder="Constructora Ejemplo S.A.S."
           />
+          <input type="hidden" name="legal_name" value={client?.legal_name ?? ""} />
         </div>
-        <div className="field sm:col-span-2">
-          <Label htmlFor="legal_name">Razón social / nombre completo</Label>
+        <div className="field">
+          <Label htmlFor="trade_name">Nombre comercial (opcional)</Label>
           <Input
-            id="legal_name"
-            name="legal_name"
-            defaultValue={client?.legal_name ?? ""}
-            placeholder="Opcional si coincide con el nombre"
+            id="trade_name"
+            name="trade_name"
+            defaultValue={client?.trade_name ?? ""}
+            placeholder="Marca o nombre comercial"
           />
         </div>
         <div className="field">
           <Label htmlFor="document_type">Tipo de documento</Label>
-          <select
+          <FormSelect
             id="document_type"
             name="document_type"
             value={docType}
-            onChange={(e) => setDocType(e.target.value as typeof docType)}
-          >
-            {DOCUMENT_TYPES.map((d) => (
-              <option key={d.value} value={d.value}>
-                {d.label}
-              </option>
-            ))}
-          </select>
+            onValueChange={(v) => setDocType(v as typeof docType)}
+            options={DOCUMENT_TYPES.map((d) => ({
+              value: d.value,
+              label: d.label,
+            }))}
+          />
         </div>
         <div className="grid grid-cols-[1fr_auto] gap-2">
           <div className="field">
@@ -125,18 +124,10 @@ export function ClientForm({
             <input type="hidden" name="document_dv" value="" />
           )}
         </div>
-        <div className="field">
-          <Label htmlFor="city">Ciudad</Label>
-          <Input id="city" name="city" defaultValue={client?.city ?? ""} />
-        </div>
-        <div className="field">
-          <Label htmlFor="department">Departamento</Label>
-          <Input
-            id="department"
-            name="department"
-            defaultValue={client?.department ?? ""}
-          />
-        </div>
+        <LocationFields
+          departmentDefault={client?.department}
+          cityDefault={client?.city}
+        />
         <div className="field sm:col-span-2">
           <Label htmlFor="address">Dirección</Label>
           <Input
