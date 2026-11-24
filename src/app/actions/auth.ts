@@ -64,11 +64,8 @@ export async function requestPasswordResetAction(
   if (!email) return { error: "Indica tu correo." };
 
   const supabase = await createClient();
-  const origin =
-    process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ??
-    (process.env.VERCEL_URL
-      ? `https://${process.env.VERCEL_URL}`
-      : "http://localhost:3000");
+  const { getSiteUrl } = await import("@/lib/env");
+  const origin = getSiteUrl();
 
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
     redirectTo: `${origin}/restablecer`,
